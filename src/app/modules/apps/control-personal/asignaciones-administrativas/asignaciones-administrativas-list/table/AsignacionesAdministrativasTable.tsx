@@ -65,9 +65,7 @@ const AsignacionesAdministrativasTable = ({
                   </td>
                   <td>
                     {horariosTipo.find(
-                      (horario) =>
-                        horario.id_horario_tipo ===
-                        Number(item.id_horario_tipo ?? item.id_tipo_horario ?? 0)
+                      (horario) => horario.id_horario_tipo === Number(item.id_horario_tipo ?? 0)
                     )?.nombre_horario_tipo || '-'}
                   </td>
                   <td>
@@ -86,7 +84,7 @@ const AsignacionesAdministrativasTable = ({
                       <select
                         className='form-select form-select-sm'
                         style={{width: '180px'}}
-                        value={String(item.id_horario_tipo ?? item.id_tipo_horario ?? '')}
+                        value={String(item.id_horario_tipo ?? '')}
                         onChange={(event) => {
                           void onHorarioTipoChange(item, event.target.value)
                         }}

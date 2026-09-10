@@ -14,11 +14,10 @@ axiosClient.interceptors.response.use(
   (error) => {
     const status = error?.response?.status
     // console.log(error.response);
-    
 
     if (status === 401) {
-    //   toast.error('Sesión expirada. Por favor inicia sesión nuevamente.')
-      window.location.href =  API_URL+ '/login'
+      //   toast.error('Sesión expirada. Por favor inicia sesión nuevamente.')
+      window.location.href = '/login'
     }
 
     return Promise.reject(error)

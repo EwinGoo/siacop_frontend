@@ -34,10 +34,8 @@ const ImportacionesPage = () => {
     const total = archivosResumen.reduce(
       (acc, item) => {
         acc.totalLineas += toNumber(item.total_lineas_archivo)
-        acc.rawInsertados += toNumber(item.raw_insertados)
-        acc.rawDuplicados += toNumber(item.raw_duplicados)
-        acc.normalizadosInsertados += toNumber(item.normalizados_insertados)
-        acc.normalizadosDuplicados += toNumber(item.normalizados_duplicados)
+        acc.marcacionesInsertadas += toNumber(item.marcaciones_insertadas)
+        acc.marcacionesDuplicadas += toNumber(item.marcaciones_duplicadas)
         acc.sinPersona += toNumber(item.sin_persona_relacionada)
         acc.duracionS +=
           item.duracion_s !== undefined && item.duracion_s !== null
@@ -48,10 +46,8 @@ const ImportacionesPage = () => {
       },
       {
         totalLineas: 0,
-        rawInsertados: 0,
-        rawDuplicados: 0,
-        normalizadosInsertados: 0,
-        normalizadosDuplicados: 0,
+        marcacionesInsertadas: 0,
+        marcacionesDuplicadas: 0,
         sinPersona: 0,
         duracionS: 0,
       }
@@ -395,8 +391,7 @@ const ImportacionesPage = () => {
                     <th>Archivo</th>
                     <th>Estado</th>
                     <th>Líneas</th>
-                    <th>Raw</th>
-                    <th>Normalizadas</th>
+                    <th>Marcaciones</th>
                     <th>Sin persona</th>
                     <th>Duración</th>
                   </tr>
@@ -413,14 +408,8 @@ const ImportacionesPage = () => {
                       <td><StatusBadge value={item.estado_importacion} /></td>
                       <td>{item.total_lineas_archivo ?? 0}</td>
                       <td>
-                        <div>Insertadas: {item.raw_insertados ?? 0}</div>
-                        <div className='text-muted fs-7'>Duplicadas: {item.raw_duplicados ?? 0}</div>
-                      </td>
-                      <td>
-                        <div>Insertadas: {item.normalizados_insertados ?? 0}</div>
-                        <div className='text-muted fs-7'>
-                          Duplicadas: {item.normalizados_duplicados ?? 0}
-                        </div>
+                        <div>Insertadas: {item.marcaciones_insertadas ?? 0}</div>
+                        <div className='text-muted fs-7'>Duplicadas: {item.marcaciones_duplicadas ?? 0}</div>
                       </td>
                       <td>{item.sin_persona_relacionada ?? 0}</td>
                       <td>{item.duracion_s ?? 0} s</td>
@@ -431,14 +420,8 @@ const ImportacionesPage = () => {
                     <td>{archivosResumen.length} archivo(s)</td>
                     <td>{totalesImportacion.totalLineas}</td>
                     <td>
-                      <div>Insertadas: {totalesImportacion.rawInsertados}</div>
-                      <div className='text-muted fs-7'>Duplicadas: {totalesImportacion.rawDuplicados}</div>
-                    </td>
-                    <td>
-                      <div>Insertadas: {totalesImportacion.normalizadosInsertados}</div>
-                      <div className='text-muted fs-7'>
-                        Duplicadas: {totalesImportacion.normalizadosDuplicados}
-                      </div>
+                      <div>Insertadas: {totalesImportacion.marcacionesInsertadas}</div>
+                      <div className='text-muted fs-7'>Duplicadas: {totalesImportacion.marcacionesDuplicadas}</div>
                     </td>
                     <td>{totalesImportacion.sinPersona}</td>
                     <td>{totalesImportacion.duracionS} s</td>

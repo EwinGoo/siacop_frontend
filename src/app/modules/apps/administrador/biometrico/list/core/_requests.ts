@@ -155,6 +155,23 @@ const syncDeviceTime = (id: ID): Promise<DeviceTimeSyncResponse | undefined> => 
     .then((response) => response.data.data)
 }
 
+const downloadBiometricoMarcacionesDat = async (
+  id: ID
+): Promise<{blob: Blob; filename: string}> => {
+  const response = await axiosClient.get(`${BIOMETRICO_URL}/${id}/descargar-marcaciones-dat`, {
+    responseType: 'blob',
+  })
+
+  const disposition = String(response.headers['content-disposition'] ?? '')
+  const filenameMatch = disposition.match(/filename="?([^"]+)"?/i)
+  const filename = filenameMatch?.[1] || `biometrico_${id}_attlog.dat`
+
+  return {
+    blob: response.data as Blob,
+    filename,
+  }
+}
+
 const loginBiometrico = (
   device_ip: string,
   username: string,
@@ -286,6 +303,7 @@ export {
   testDeviceVoice,
   getDeviceTime,
   syncDeviceTime,
+  downloadBiometricoMarcacionesDat,
   loginBiometrico,
   logoutBiometrico,
   getDeviceUsers,

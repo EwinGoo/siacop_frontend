@@ -19,10 +19,8 @@ export interface ImportacionArchivoResultado {
   total_lineas_archivo?: number
   lineas_validas?: number
   lineas_invalidas?: number
-  raw_insertados?: number
-  raw_duplicados?: number
-  normalizados_insertados?: number
-  normalizados_duplicados?: number
+  marcaciones_insertadas?: number
+  marcaciones_duplicadas?: number
   sin_persona_relacionada?: number
   lineas_invalidas_detalle?: Array<Record<string, unknown>>
   estado_importacion?: string
@@ -267,32 +265,12 @@ export interface ReporteBonoRefrigerioParams {
     | 'SOLO_OBSERVADOS'
   search?: string
 }
-export interface MarcacionRaw {
-  id_marcacion_raw: number
-  tipo_ingesta?: string | null
-  archivo_origen?: string | null
-  linea_origen?: number | null
-  serial_dispositivo?: string | null
-  id_biometrico_dispositivo?: number | null
-  ip_origen?: string | null
-  contenido_linea?: string | null
-  payload_origen?: string | null
-  user_id_biometrico?: string | null
-  fecha_hora_marcacion?: string | null
-  tipo_verificacion?: string | null
-  estado_marcacion?: string | null
-  work_code?: string | null
-  hash_evento?: string | null
-  fecha_importacion?: string | null
-  fecha_recepcion?: string | null
-  usuario_importacion?: string | null
-  estado_importacion?: string | null
-  estado_procesamiento?: string | null
-}
-
 export interface MarcacionNormalizada {
   id_marcacion: number
-  id_marcacion_raw?: number | null
+  archivo_origen?: string | null
+  linea_origen?: number | null
+  fecha_recepcion?: string | null
+  usuario_importacion?: string | null
   id_persona?: number | null
   id_biometrico_dispositivo?: number | null
   serial_dispositivo?: string | null
@@ -300,13 +278,13 @@ export interface MarcacionNormalizada {
   fecha_hora_marcacion?: string | null
   fecha_marcacion?: string | null
   hora_marcacion?: string | null
-  origen_marcacion?: string | null
+  tipo_origen?: string | null
   tipo_verificacion?: string | null
   estado_marcacion?: string | null
   work_code?: string | null
-  estado_normalizacion?: string | null
-  observacion_normalizacion?: string | null
-  hash_deduplicacion?: string | null
+  estado_procesamiento?: string | null
+  observacion?: string | null
+  hash_evento?: string | null
   es_principal?: number | string | null
 }
 
@@ -403,4 +381,11 @@ export interface MisMarcacionesResponse extends ListadoPaginado<MarcacionNormali
       asociado_a_persona?: boolean
     }>
   }
+}
+
+export interface MisMarcacionesSyncResponse {
+  status?: string
+  message?: string | null
+  origen?: string | null
+  sync?: Record<string, unknown>
 }

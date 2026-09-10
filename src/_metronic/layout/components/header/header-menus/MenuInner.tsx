@@ -1,10 +1,10 @@
 import {ExternalLink} from './ExternalLink'
-import { API_BASE_URL } from 'src/app/config/apiRoutes'
+import {API_BASE_URL} from 'src/app/config/apiRoutes'
 
 export function MenuInner() {
   return (
     <>
-      <ExternalLink href={`${API_BASE_URL}/principal`} title='Principal' />
+      <ExternalLink href={`/principal`} title='Principal' />
       {/* <MenuItem title={intl.formatMessage({id: 'MENU.DASHBOARD'})} to='/dashboard' />
       <MenuItem title='Layout Builder' to='/builder' />
       <MenuInnerWithSub

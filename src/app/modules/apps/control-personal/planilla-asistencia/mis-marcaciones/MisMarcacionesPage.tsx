@@ -12,7 +12,13 @@ import {
   PaginationPayload,
   PlanillaMensualPDFData,
 } from '../core/_models'
-import {generarReporteMisMarcaciones, getMisMarcaciones} from '../core/_requests'
+import {
+  generarReporteMisMarcaciones,
+  getMisMarcaciones,
+  getMisMarcacionesEstadoSync,
+  getMisMarcacionesResumenAtrasos,
+  syncMisMarcacionesBiometrico,
+} from '../core/_requests'
 
 const PAGE_SIZE = 25
 const formatDateInput = (date: Date) => {
@@ -113,24 +119,56 @@ const MisMarcacionesPage = () => {
     }
   }, [oficiales, rows])
 
+  const cargarDatos = async (nextPage = page) => {
+    const params = {
+      fecha_desde: fechaDesde || undefined,
+      fecha_hasta: fechaHasta || undefined,
+    }
+
+    const [response, estadoSync, resumenAtrasosData] = await Promise.all([
+      getMisMarcaciones(nextPage, PAGE_SIZE, params),
+      getMisMarcacionesEstadoSync(params),
+      getMisMarcacionesResumenAtrasos(params),
+    ])
+
+    setRows(response.data || [])
+    setOficiales(response.oficiales || [])
+    setEstadoSincronizacion(estadoSync)
+    setResumenAtrasos(resumenAtrasosData)
+    setPagination(response.pagination || {page: nextPage, total: 0, items_per_page: PAGE_SIZE})
+  }
+
   const cargar = async (nextPage = page) => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await getMisMarcaciones(nextPage, PAGE_SIZE, {
-        fecha_desde: fechaDesde || undefined,
-        fecha_hasta: fechaHasta || undefined,
-      })
-      setRows(response.data || [])
-      setOficiales(response.oficiales || [])
-      setEstadoSincronizacion(response.estado_sincronizacion)
-      setSincronizacionExterna(response.sincronizacion_externa)
-      setResumenAtrasos(response.resumen_atrasos)
-      setPagination(response.pagination || {page: nextPage, total: 0, items_per_page: PAGE_SIZE})
+      await cargarDatos(nextPage)
     } catch (err: any) {
       setError(
         err?.response?.data?.message || err?.message || 'No se pudieron cargar sus marcaciones.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const actualizarDesdeBiometrico = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const sync = await syncMisMarcacionesBiometrico({
+        fecha_desde: fechaDesde || undefined,
+        fecha_hasta: fechaHasta || undefined,
+      })
+      setSincronizacionExterna(sync)
+      await cargarDatos(page)
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          'No se pudieron sincronizar sus marcaciones desde el biométrico.'
       )
     } finally {
       setLoading(false)
@@ -361,9 +399,9 @@ const MisMarcacionesPage = () => {
               <button
                 type='button'
                 className='btn btn-light-primary'
-                onClick={() => void cargar()}
+                onClick={() => void actualizarDesdeBiometrico()}
                 disabled={loading}
-                title='Recargar'
+                title='Actualizar marcaciones desde biométrico'
               >
                 {loading ? (
                   <span className='spinner-border spinner-border-sm' />
@@ -470,7 +508,7 @@ const MisMarcacionesPage = () => {
                           </td> */}
                           {/* <td>{row.tipo_verificacion || '-'}</td>
                           <td>
-                            <StatusBadge value={row.origen_marcacion || '-'} />
+                            <StatusBadge value={row.tipo_origen || '-'} />
                           </td> */}
                         </tr>
                       ))}

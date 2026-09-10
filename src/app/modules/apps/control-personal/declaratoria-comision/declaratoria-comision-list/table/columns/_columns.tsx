@@ -58,9 +58,7 @@ const getColumns = ({
     accessor: 'nombre_generador',
   },
   {
-    Header: (props) => (
-      <CustomHeader tableProps={props} title='N° Corr.' className='w-actions' />
-    ),
+    Header: (props) => <CustomHeader tableProps={props} title='N° Corr.' className='w-actions' />,
     accessor: 'nro_correlativo',
   },
   {
@@ -68,7 +66,7 @@ const getColumns = ({
     accessor: 'ci',
   },
   {
-    Header: (props) => <CustomHeader tableProps={props} title='Periodo' className='min-w-120px' />,
+    Header: (props) => <CustomHeader tableProps={props} title='Periodo' className='min-w-200px' />,
     id: 'periodo',
     Cell: ({row}) => <DateCell declaratoria={row.original} />,
   },
@@ -76,17 +74,17 @@ const getColumns = ({
   //   Header: (props) => <CustomHeader tableProps={props} title='Destino' className='min-w-150px' />,
   //   accessor: 'destino',
   // },
-  // {
-  //   Header: (props) => <CustomHeader tableProps={props} title='Viático' className='min-w-100px' />,
-  //   accessor: 'tipo_viatico',
-  //   Cell: ({value}) => (
-  //     <span className={`badge badge-light-${value === 'con_viatico' ? 'success' : 'primary'}`}>
-  //       {value === 'con_viatico' ? 'Con viático' : 'Sin viático'}
-  //     </span>
-  //   ),
-  // },
   {
-    Header: (props) => <CustomHeader tableProps={props} title='HR N°' className='min-w-100px' />,
+    Header: (props) => <CustomHeader tableProps={props} title='Viático' className='min-w-100px' />,
+    accessor: 'tipo_viatico',
+    Cell: ({value}) => (
+      <span className={`badge badge-light-${value === 'con_viatico' ? 'success' : 'primary'}`}>
+        {value === 'con_viatico' ? 'Con viático' : 'Sin viático'}
+      </span>
+    ),
+  },
+  {
+    Header: (props) => <CustomHeader tableProps={props} title='HR N°' className='min-w-80px' />,
     accessor: 'rrhh_hoja_ruta_numero',
   },
   {
@@ -96,7 +94,7 @@ const getColumns = ({
   },
   {
     Header: (props) => (
-      <CustomHeader tableProps={props} title='Elaboración' className='min-w-120px' />
+      <CustomHeader tableProps={props} title='Elaboración' className='min-w-180px' />
     ),
     id: 'fecha_elaboracion',
     Cell: ({row}) => <ElaboracionCell declaratoria={row.original} />,

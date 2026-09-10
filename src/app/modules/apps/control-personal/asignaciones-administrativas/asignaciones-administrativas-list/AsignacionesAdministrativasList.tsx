@@ -47,7 +47,7 @@ const AsignacionesAdministrativasListInner = () => {
       return
     }
 
-    const horarioActual = item.id_horario_tipo ?? item.id_tipo_horario ?? ''
+    const horarioActual = item.id_horario_tipo ?? ''
     const horarioNuevo = value === '' ? null : Number(value)
 
     if ((horarioActual === '' ? null : Number(horarioActual)) === horarioNuevo) {

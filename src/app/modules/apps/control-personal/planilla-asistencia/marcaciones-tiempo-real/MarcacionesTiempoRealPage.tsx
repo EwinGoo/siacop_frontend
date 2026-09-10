@@ -2,10 +2,10 @@ import {useEffect, useMemo, useState} from 'react'
 import {KTCard} from 'src/_metronic/helpers'
 import {EmptyState} from '../components/EmptyState'
 import {StatusBadge} from '../components/StatusBadge'
-import {MarcacionNormalizada, MarcacionRaw, PaginationPayload} from '../core/_models'
-import {getMarcacionesNormalizadas, getMarcacionesRaw} from '../core/_requests'
+import {MarcacionNormalizada, PaginationPayload} from '../core/_models'
+import {getMarcaciones} from '../core/_requests'
 
-type TabKey = 'normalizadas' | 'pendientes'
+type TabKey = 'marcaciones' | 'pendientes'
 
 type Filters = {
   user_id_biometrico: string
@@ -18,10 +18,10 @@ const PAGE_SIZE = 25
 const today = () => new Date().toISOString().slice(0, 10)
 
 const MarcacionesTiempoRealPage = () => {
-  const [activeTab, setActiveTab] = useState<TabKey>('normalizadas')
+  const [activeTab, setActiveTab] = useState<TabKey>('marcaciones')
   const [filters, setFilters] = useState<Filters>({user_id_biometrico: '', fecha_desde: today(), fecha_hasta: today()})
-  const [normalizadas, setNormalizadas] = useState<MarcacionNormalizada[]>([])
-  const [pendientes, setPendientes] = useState<MarcacionRaw[]>([])
+  const [marcaciones, setMarcaciones] = useState<MarcacionNormalizada[]>([])
+  const [pendientes, setPendientes] = useState<MarcacionNormalizada[]>([])
   const [pagination, setPagination] = useState<PaginationPayload>({page: 1, total: 0, items_per_page: PAGE_SIZE})
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -48,17 +48,17 @@ const MarcacionesTiempoRealPage = () => {
         fecha_hasta: filters.fecha_hasta || undefined,
       }
 
-      if (tab === 'normalizadas') {
-        const response = await getMarcacionesNormalizadas(nextPage, PAGE_SIZE, {
+      if (tab === 'marcaciones') {
+        const response = await getMarcaciones(nextPage, PAGE_SIZE, {
           ...params,
-          origen_marcacion: 'BIOMETRICO_PUSH',
+          tipo_origen: 'PUSH',
         })
-        setNormalizadas(response.data || [])
+        setMarcaciones(response.data || [])
         setPagination(response.pagination || {page: nextPage, total: 0, items_per_page: PAGE_SIZE})
       } else {
-        const response = await getMarcacionesRaw(nextPage, PAGE_SIZE, {
+        const response = await getMarcaciones(nextPage, PAGE_SIZE, {
           ...params,
-          tipo_ingesta: 'PUSH',
+          tipo_origen: 'PUSH',
           estado_procesamiento: 'PENDIENTE',
         })
         setPendientes(response.data || [])
@@ -94,12 +94,12 @@ const MarcacionesTiempoRealPage = () => {
       setError(null)
 
       try {
-        const response = await getMarcacionesNormalizadas(1, PAGE_SIZE, {
+        const response = await getMarcaciones(1, PAGE_SIZE, {
           fecha_desde: today(),
           fecha_hasta: today(),
-          origen_marcacion: 'BIOMETRICO_PUSH',
+          tipo_origen: 'PUSH',
         })
-        setNormalizadas(response.data || [])
+        setMarcaciones(response.data || [])
         setPagination(response.pagination || {page: 1, total: 0, items_per_page: PAGE_SIZE})
       } catch (err: any) {
         setError(err?.response?.data?.message || err?.message || 'No se pudieron cargar las marcaciones.')
@@ -170,8 +170,8 @@ const MarcacionesTiempoRealPage = () => {
           <div className='card-toolbar w-100'>
             <ul className='nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-6 fw-bold w-100'>
               <li className='nav-item'>
-                <button type='button' className={`nav-link text-active-primary me-6 ${activeTab === 'normalizadas' ? 'active' : ''}`} onClick={() => cambiarTab('normalizadas')}>
-                  <i className='bi bi-broadcast-pin me-2' /> Normalizadas
+                <button type='button' className={`nav-link text-active-primary me-6 ${activeTab === 'marcaciones' ? 'active' : ''}`} onClick={() => cambiarTab('marcaciones')}>
+                  <i className='bi bi-broadcast-pin me-2' /> Marcaciones
                 </button>
               </li>
               <li className='nav-item'>
@@ -188,9 +188,9 @@ const MarcacionesTiempoRealPage = () => {
         <div className='card-body pt-2'>
           {loading ? (
             <div className='text-muted'>Cargando marcaciones...</div>
-          ) : activeTab === 'normalizadas' ? (
-            normalizadas.length === 0 ? (
-              <EmptyState title='Sin marcaciones normalizadas' description='No hay registros para los filtros seleccionados.' />
+          ) : activeTab === 'marcaciones' ? (
+            marcaciones.length === 0 ? (
+              <EmptyState title='Sin marcaciones' description='No hay registros para los filtros seleccionados.' />
             ) : (
               <div className='table-responsive'>
                 <table className='table align-middle table-row-dashed fs-6 gy-4'>
@@ -206,7 +206,7 @@ const MarcacionesTiempoRealPage = () => {
                     </tr>
                   </thead>
                   <tbody className='fw-semibold text-gray-700'>
-                    {normalizadas.map((row) => (
+                    {marcaciones.map((row) => (
                       <tr key={row.id_marcacion}>
                         <td>{row.fecha_hora_marcacion || '-'}</td>
                         <td>{row.id_persona ? `ID ${row.id_persona}` : 'Sin persona'}</td>
@@ -219,7 +219,7 @@ const MarcacionesTiempoRealPage = () => {
                         </td>
                         <td><StatusBadge value={row.estado_marcacion || '-'} /></td>
                         <td>{row.tipo_verificacion || '-'}</td>
-                        <td><StatusBadge value={row.estado_normalizacion || '-'} /></td>
+                        <td><StatusBadge value={row.estado_procesamiento || '-'} /></td>
                       </tr>
                     ))}
                   </tbody>
@@ -244,7 +244,7 @@ const MarcacionesTiempoRealPage = () => {
                 </thead>
                 <tbody className='fw-semibold text-gray-700'>
                   {pendientes.map((row) => (
-                    <tr key={row.id_marcacion_raw}>
+                    <tr key={row.id_marcacion}>
                       <td>{row.fecha_recepcion || row.fecha_importacion || '-'}</td>
                       <td>{row.fecha_hora_marcacion || '-'}</td>
                       <td>{row.user_id_biometrico || '-'}</td>

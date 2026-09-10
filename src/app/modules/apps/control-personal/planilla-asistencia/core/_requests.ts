@@ -7,8 +7,8 @@ import {
   ImportacionResumenResponse,
   ListadoPaginado,
   MarcacionNormalizada,
-  MarcacionRaw,
   MisMarcacionesResponse,
+  MisMarcacionesSyncResponse,
   PlanillaMensualPDFData,
   ProcesoPlanilla,
   ProcesoPlanillaDetalle,
@@ -65,23 +65,9 @@ export const getResumenImportaciones = async () => {
   return unwrap(response)
 }
 
-export const getMarcacionesRaw = async (page = 1, itemsPerPage = 25, params?: Record<string, unknown>) => {
-  const response = await axiosClient.get<BackendEnvelope<ListadoPaginado<MarcacionRaw>>>(
-    `${BASE_URL}/importaciones/marcaciones/raw`,
-    {
-      params: {
-        page,
-        items_per_page: itemsPerPage,
-        ...(params || {}),
-      },
-    }
-  )
-  return unwrap(response)
-}
-
-export const getMarcacionesNormalizadas = async (page = 1, itemsPerPage = 25, params?: Record<string, unknown>) => {
+export const getMarcaciones = async (page = 1, itemsPerPage = 25, params?: Record<string, unknown>) => {
   const response = await axiosClient.get<BackendEnvelope<ListadoPaginado<MarcacionNormalizada>>>(
-    `${BASE_URL}/importaciones/marcaciones/normalizadas`,
+    `${BASE_URL}/importaciones/marcaciones`,
     {
       params: {
         page,
@@ -94,7 +80,11 @@ export const getMarcacionesNormalizadas = async (page = 1, itemsPerPage = 25, pa
 }
 
 
-export const getMisMarcaciones = async (page = 1, itemsPerPage = 25, params?: Record<string, unknown>) => {
+export const getMisMarcaciones = async (
+  page = 1,
+  itemsPerPage = 25,
+  params?: Record<string, unknown>
+) => {
   const response = await axiosClient.get<BackendEnvelope<MisMarcacionesResponse>>(
     `${BASE_URL}/importaciones/marcaciones/mias`,
     {
@@ -105,6 +95,41 @@ export const getMisMarcaciones = async (page = 1, itemsPerPage = 25, params?: Re
       },
     }
   )
+  return unwrap(response)
+}
+
+export const syncMisMarcacionesBiometrico = async (params?: Record<string, unknown>) => {
+  const response = await axiosClient.post<BackendEnvelope<MisMarcacionesSyncResponse>>(
+    `${BASE_URL}/importaciones/marcaciones/mias/sincronizar-biometrico`,
+    null,
+    {
+      params: {
+        ...(params || {}),
+      },
+    }
+  )
+  return unwrap(response)
+}
+
+export const getMisMarcacionesEstadoSync = async (params?: Record<string, unknown>) => {
+  const response = await axiosClient.get<
+    BackendEnvelope<MisMarcacionesResponse['estado_sincronizacion']>
+  >(`${BASE_URL}/importaciones/marcaciones/mias/estado-sync`, {
+    params: {
+      ...(params || {}),
+    },
+  })
+  return unwrap(response)
+}
+
+export const getMisMarcacionesResumenAtrasos = async (params?: Record<string, unknown>) => {
+  const response = await axiosClient.get<
+    BackendEnvelope<MisMarcacionesResponse['resumen_atrasos']>
+  >(`${BASE_URL}/importaciones/marcaciones/mias/resumen-atrasos`, {
+    params: {
+      ...(params || {}),
+    },
+  })
   return unwrap(response)
 }
 

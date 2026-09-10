@@ -15,7 +15,6 @@ export type AsignacionAdministrativa = {
   id_poa: number | ''
   id_nivel?: number | '' | null
   id_horario_tipo?: number | '' | null
-  id_tipo_horario?: number | '' | null
   fecha_inicio_asignacion_administrativo?: string | null
   fecha_fin_asignacion_administrativo?: string | null
   numero_memorandum?: string | null
@@ -60,7 +59,6 @@ export const initialAsignacionAdministrativa: AsignacionAdministrativa = {
   id_poa: '',
   id_nivel: '',
   id_horario_tipo: '',
-  id_tipo_horario: '',
   fecha_inicio_asignacion_administrativo: '',
   fecha_fin_asignacion_administrativo: '',
   numero_memorandum: '',

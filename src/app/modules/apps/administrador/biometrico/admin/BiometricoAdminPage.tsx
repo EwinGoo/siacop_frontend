@@ -11,6 +11,7 @@ import {
   testDeviceVoice,
   syncBiometricoMarcaciones,
   syncBiometricoUsuarios,
+  downloadBiometricoMarcacionesDat,
 } from '../list/core/_requests'
 import {
   BiometricoDispositivoUsuario,
@@ -34,6 +35,7 @@ const BiometricoAdminPage = () => {
   const [sounding, setSounding] = useState(false)
   const [loadingDeviceTime, setLoadingDeviceTime] = useState(false)
   const [syncingDeviceTime, setSyncingDeviceTime] = useState(false)
+  const [downloadingDat, setDownloadingDat] = useState(false)
   const [deviceTimeInfo, setDeviceTimeInfo] = useState<DeviceTimeResponse | null>(null)
   const [fechaDesde, setFechaDesde] = useState(today())
   const [fechaHasta, setFechaHasta] = useState(today())
@@ -190,6 +192,38 @@ const BiometricoAdminPage = () => {
       })
     } finally {
       setLoadingDeviceTime(false)
+    }
+  }
+
+  const handleDescargarDat = async () => {
+    if (!id) return
+
+    setDownloadingDat(true)
+    try {
+      const response = await downloadBiometricoMarcacionesDat(Number(id))
+      const url = window.URL.createObjectURL(response.blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = response.filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      await Promise.all([recargarDispositivo(), recargarEventos()])
+      showToast({
+        type: 'success',
+        message: `Archivo DAT descargado: ${response.filename}`,
+      })
+    } catch (error: any) {
+      showToast({
+        type: 'error',
+        message:
+          error?.response?.data?.message ||
+          'No se pudo descargar el archivo DAT de marcaciones del biométrico.',
+      })
+    } finally {
+      setDownloadingDat(false)
     }
   }
 
@@ -795,6 +829,20 @@ const BiometricoAdminPage = () => {
                           <i className='bi bi-cloud-download me-2' />
                         )}
                         Sincronizar marcaciones
+                      </button>
+                    </div>
+                    <div className='col-md-4'>
+                      <button
+                        className='btn btn-light-success w-100'
+                        onClick={handleDescargarDat}
+                        disabled={downloadingDat}
+                      >
+                        {downloadingDat ? (
+                          <span className='spinner-border spinner-border-sm me-2' />
+                        ) : (
+                          <i className='bi bi-file-earmark-arrow-down me-2' />
+                        )}
+                        Descargar ATTLOG .dat
                       </button>
                     </div>
                   </div>
