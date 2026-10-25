@@ -1,9 +1,22 @@
 // src/app/config/apiRoutes.ts
 
-export const API_BASE_URL = process.env.REACT_APP_API_URL || '' // fallback para evitar undefined
-export const API_URL = process.env.ASISTENCIA_PERMISO || '' // fallback para evitar undefined
+export const API_BASE_URL = process.env.REACT_APP_API_URL || ''
+export const API_URL = process.env.ASISTENCIA_PERMISO || ''
+
+// El login MVC comparte la base del backend versionado que usa esta aplicación.
+export const BACKEND_LOGIN_URL = `${API_BASE_URL.replace(/\/api\/v1\/?$/, '').replace(
+  /\/$/,
+  ''
+)}/login`
+
+export const ARCHIVO_LOGIN_URL = BACKEND_LOGIN_URL
+export const BACKEND_2FA_URL = `${BACKEND_LOGIN_URL.replace(
+  /\/login$/,
+  ''
+)}/seguridad/usuario/verificacion-2fa`
 
 export const API_ROUTES = {
+  ARCHIVO_CENTRAL: `${(API_BASE_URL || '/api/v1').replace(/\/$/, '')}/archivo-central`,
   ADMINISTRADOR: `${API_BASE_URL}/administrador`,
   CONTROL_PERSONAL: `${API_BASE_URL}/control-personal`,
   PLANILLAS: `${API_BASE_URL}/planillas`,

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import {AuthModel, UserModel, UserCheckRequest} from './_models'
 
-const API_URL = process.env.REACT_APP_API_URL
+import {API_BASE_URL as API_URL} from '../../../config/apiRoutes'
 
 export const GET_USER_BY_SESSION_URL = `${API_URL}/auth/check`
 export const GET_USER_BY_ACCESSTOKEN_URL = `${API_URL}/auth/token`

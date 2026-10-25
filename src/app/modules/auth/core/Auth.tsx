@@ -1,3 +1,4 @@
+import {handleAuthError} from '../../../services/axiosClient'
 import {
   FC,
   useState,
@@ -169,7 +170,7 @@ const AuthInit: FC<WithChildren> = ({children}) => {
         }
       } catch (error: any) {
         console.error(error)
-        if (!isMounted) {
+        if (!isMounted || handleAuthError.isRedirecting()) {
           return
         }
 
@@ -180,7 +181,7 @@ const AuthInit: FC<WithChildren> = ({children}) => {
 
         logout()
       } finally {
-        if (isMounted) {
+        if (isMounted && !handleAuthError.isRedirecting()) {
           disableSplashScreen()
           setShowSplashScreen(false)
         }
@@ -194,11 +195,7 @@ const AuthInit: FC<WithChildren> = ({children}) => {
     }
   }, [logout, navigate, setCurrentUser])
 
-  return showSplashScreen ? (
-    <AppBootstrapScreen description='Cargando ...' />
-  ) : (
-    <>{children}</>
-  )
+  return showSplashScreen ? <AppBootstrapScreen description='Cargando ...' /> : <>{children}</>
 }
 
 export {AuthProvider, AuthInit, useAuth}

@@ -8,7 +8,10 @@ import {WithChildren} from '../../_metronic/helpers'
 import {ProtectedRoute} from '../modules/auth/core/ProtectedRoute'
 import AccessDeniedPage from '../pages/AccessDeniedPage'
 import {PERMISSIONS} from '../modules/auth/core/roles/permissions'
+import {GroupRoute} from '../modules/apps/archivo-central/components/GroupRoute'
 import {ListLoading} from '../modules/components/loading/ListLoading'
+
+const ArchivoCentralPage = lazy(() => import('../modules/apps/archivo-central/ArchivoCentralPage'))
 
 const PrivateRoutes = () => {
   const ComisionPage = lazy(() => import('../modules/apps/control-personal/comision/ComisionPage'))
@@ -62,6 +65,26 @@ const PrivateRoutes = () => {
   return (
     <Routes>
       <Route element={<MasterLayout />}>
+        <Route
+          path='apps/auditoria/*'
+          element={
+            <GroupRoute groups={['auditoria', 'operador_archivo', 'administrador']}>
+              <SuspensedView>
+                <ArchivoCentralPage modo='auditoria' />
+              </SuspensedView>
+            </GroupRoute>
+          }
+        />
+        <Route
+          path='apps/archivo-central/*'
+          element={
+            <GroupRoute groups={['operador_archivo', 'administrador']}>
+              <SuspensedView>
+                <ArchivoCentralPage modo='gestion' />
+              </SuspensedView>
+            </GroupRoute>
+          }
+        />
         {/* RUTAS ACTUALIZADAS CON NUEVO SISTEMA DE PERMISOS */}
 
         {/* Feriados y Asuetos - requiere permiso específico */}

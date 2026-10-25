@@ -266,6 +266,8 @@ export interface ReporteBonoRefrigerioParams {
   search?: string
 }
 export interface MarcacionNormalizada {
+  fecha_importacion?: string | null
+  ip_origen?: string | null
   id_marcacion: number
   archivo_origen?: string | null
   linea_origen?: number | null

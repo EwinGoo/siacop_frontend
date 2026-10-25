@@ -1,0 +1,49 @@
+# Archivo Central: frontend
+
+Fecha: 2026-10-22. Estado: Fase 2 implementada. Pruebas y build habitual aprobados; CI estricto y revisión visual pendientes, detallados en PRUEBAS.md.
+
+- [Análisis real](ANALISIS_REPOSITORIO.md)
+- [Pantallas y arquitectura](PANTALLAS.md)
+- [Estado y contratos TypeScript](ESTADO_Y_API.md)
+- [Pruebas y limitaciones](PRUEBAS.md)
+- [Backend y decisiones compartidas](../../../siacop_backend/doc/archivo-central/README.md)
+- [Contrato API canónico](../../../siacop_backend/doc/archivo-central/API.md)
+
+Se autorizan consultas generales por grupos de sesión. Auditoría y operador tienen interfaces diferentes; no se crea un sistema de permisos específicos para este módulo. Las escrituras futuras permanecen bloqueadas por backend y UI. Históricos sin integración muestran estado explícito de indisponibilidad.
+
+
+## Backend disponible
+
+La Fase 1 ya implementa los cinco GET de consulta. Su contrato y verificaciones están en la documentación canónica del backend. Las pantallas React y las entradas de menú están implementadas. Gestión documental y almacenamiento permanecen pendientes.
+
+
+## Acceso a las interfaces
+
+- Auditoría: `/apps/auditoria`.
+- Operador y administrador: `/apps/archivo-central`.
+- El detalle de cada administrativo agrega `/{personaId}` a la ruta.
+
+Se mantiene el layout actual. MenuBuilder proporciona entradas diferentes por grupo. La entrada raíz de React redirige al operador a Archivo Central y al grupo auditoria a su consulta; si tiene ambos, se prefiere gestión. Los demás grupos conservan su entrada.
+
+La búsqueda se ejecuta al enviar el formulario; no se descargan todos los administrativos ni se hacen solicitudes por cada pulsación. Los filtros, orden y página se guardan en la URL. El detalle preserva la ruta de retorno. No se almacenan documentos ni datos personales en localStorage.
+
+[Archivos, decisiones y validación](PRUEBAS.md).
+
+
+## Fase 3 y error al abrir menús
+
+Se encontró un bundle antiguo en siacop_backend/public/siacop-v3 que no incluía Archivo Central y apuntaba a producción. Se reemplazó la copia local por la compilación local previamente generada, conservando chunks anteriores. Es necesario recargar la pestaña para abandonar el bundle antiguo.
+
+El visor habilita vista previa y descarga solo cuando API informa disponible. Históricos permanecen pendientes. No hay operaciones de escritura.
+
+Por indicación del usuario, no ejecutar más builds: ESLint es suficiente para validar los cambios siguientes. scripts/build-local.cjs y build:local quedan como utilidades para uso manual explícito, no se ejecutan automáticamente.
+
+
+## Rediseño incremental — Entrega 1
+
+Listados de Archivo Central y Auditoría implementados con reutilización Metronic, sin builds ni cambios de backend. ESLint aprobado; revisión visual pendiente. [Resultado y archivos](ENTREGA_1_RESULTADO_UX.md). No se inició Entrega 2.
+
+
+## Rediseño incremental — Entrega 2
+
+Encabezado según ProfileHeader con datos reales. La refactorización autorizada el 2026-10-23 sustituye la navegación por un listado documental unificado y ordenamiento por columnas. [UX actual](UX_UI.md), [componentes](COMPONENTES.md) y [resultado](ENTREGA_2_RESULTADO_UX.md). Sin cambios de backend ni builds; revisión visual pendiente.

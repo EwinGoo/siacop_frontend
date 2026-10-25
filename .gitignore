@@ -38,3 +38,5 @@ yarn-error.log*
 
 
 test.html
+# Compilación local con configuración de localhost
+/build-local

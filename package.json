@@ -13,7 +13,7 @@
     "@fortawesome/fontawesome-free": "6.1.1",
     "@mui/material": "^7.0.0",
     "@popperjs/core": "^2.11.6",
-    "@sentry/react": "^10.66.0",
+    "@sentry/react": "^10.76.2",
     "@types/yup": "^0.32.0",
     "animate.css": "4.1.1",
     "apexcharts": "3.35.0",
@@ -83,6 +83,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:local": "node scripts/build-local.cjs",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "prettier --check .",

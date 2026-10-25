@@ -4,6 +4,8 @@ import {APP_ROLES, RoleValue} from '../roles'
 import {Permission, PERMISSIONS} from './permissions'
 
 export const ROLE_PERMISSIONS: Record<RoleValue, Permission[]> = {
+  [APP_ROLES.AUDITORIA]: [],
+  [APP_ROLES.OPERADOR_ARCHIVO]: [],
   [APP_ROLES.ADMINISTRADOR]: [
     // Administrador tiene todos los permisos de comisión
     PERMISSIONS.COMISION.VIEW,

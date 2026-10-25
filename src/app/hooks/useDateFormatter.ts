@@ -56,14 +56,14 @@ const useDateFormatter = () => {
     })
   }
 
-  const formatLongDate = (date: string | Date) => {
+  const formatLongDate = (date: string | Date | null | undefined) => {
     if (!date) return 'N/A'
     const dateObj = typeof date === 'string' ? new Date(date) : date
     const adjustedDate = adjustToLocalTimezone(dateObj)
     return format(adjustedDate, "d 'de' MMMM 'de' yyyy", {locale: es})
   }
 
-  const formatShortDate = (date: string | Date | null) => {
+  const formatShortDate = (date: string | Date | null | undefined) => {
     if (!date) return 'N/A'
     const dateObj = typeof date === 'string' ? new Date(date) : date
     const adjustedDate = adjustToLocalTimezone(dateObj)
@@ -91,7 +91,7 @@ const useDateFormatter = () => {
     return format(adjustedDate, formatStr, {locale: es})
   }
 
-  const formatTimeFromString = (timeStr: string): string => {
+  const formatTimeFromString = (timeStr: string | null | undefined): string => {
     if (!timeStr) return ''
     const match = timeStr.match(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/)
     if (!match) {
