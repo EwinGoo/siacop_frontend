@@ -2,7 +2,7 @@ import useDateFormatter from 'src/app/hooks/useDateFormatter'
 import clsx from 'clsx'
 
 export const DateCell = ({row}) => {
-  const {formatLongDate} = useDateFormatter()
+  const {formatShortDate} = useDateFormatter()
   
   const {fecha_inicio_permiso, fecha_fin_permiso, tipo_permiso_nombre} = row.original
 
@@ -26,7 +26,7 @@ export const DateCell = ({row}) => {
         <div className='d-flex align-items-center'>
           <i className='fas fa-calendar-alt text-primary me-2' /> 
           <div>
-            <span className='fw-bold'>{formatLongDate(fecha_inicio_permiso)}</span>
+            <span className='fw-bold'>{formatShortDate(fecha_inicio_permiso)}</span>
           </div>
         </div>
       ) : (
@@ -34,11 +34,11 @@ export const DateCell = ({row}) => {
         <>
           <div className='mb-2'>
             <i className='fas fa-calendar-alt text-primary me-2' />
-            Inicio: <span className='fw-bold'>{formatLongDate(fecha_inicio_permiso)}</span>
+            De: <span className='fw-bold'>{formatShortDate(fecha_inicio_permiso)}</span>
           </div>
           <div>
             <i className='fas fa-calendar-check text-primary me-2' />
-            Fin: <span className='fw-bold'>{formatLongDate(fecha_fin_permiso)}</span>
+            A: <span className='fw-bold'>{formatShortDate(fecha_fin_permiso)}</span>
           </div>
         </>
       )}

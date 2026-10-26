@@ -14,7 +14,9 @@ interface PDFData {
 }
 
 interface ModalHandlers {
+  onPreparePDF: (title?: string) => void
   onShowPDF: (pdfData: PDFData) => void
+  onCancelPDF: () => void
   onShowData: (declaratoria: any) => void
   onSetLoading: (declaratoriaId: string, isLoading: boolean) => void
   getLoadingState: (declaratoriaId: string) => boolean
@@ -22,7 +24,9 @@ interface ModalHandlers {
 
 // Función que retorna las columnas con los handlers necesarios
 const getColumns = ({
+  onPreparePDF,
   onShowPDF,
+  onCancelPDF,
   onShowData,
   onSetLoading,
   getLoadingState,
@@ -38,7 +42,9 @@ const getColumns = ({
     Cell: ({row}) => (
       <ActionsCell
         declaratoria={row.original}
+        onPreparePDF={onPreparePDF}
         onShowPDF={onShowPDF}
+        onCancelPDF={onCancelPDF}
         onShowData={onShowData}
         onSetLoading={onSetLoading}
         isLoading={getLoadingState(row.original.id_declaratoria_comision?.toString() || '')}
@@ -52,9 +58,7 @@ const getColumns = ({
     accessor: 'nombre_generador',
   },
   {
-    Header: (props) => (
-      <CustomHeader tableProps={props} title='N° Correl.' className='w-actions' />
-    ),
+    Header: (props) => <CustomHeader tableProps={props} title='N° Corr.' className='w-actions' />,
     accessor: 'nro_correlativo',
   },
   {
@@ -62,14 +66,14 @@ const getColumns = ({
     accessor: 'ci',
   },
   {
-    Header: (props) => <CustomHeader tableProps={props} title='Periodo' className='min-w-120px' />,
+    Header: (props) => <CustomHeader tableProps={props} title='Periodo' className='min-w-200px' />,
     id: 'periodo',
     Cell: ({row}) => <DateCell declaratoria={row.original} />,
   },
-  {
-    Header: (props) => <CustomHeader tableProps={props} title='Destino' className='min-w-150px' />,
-    accessor: 'destino',
-  },
+  // {
+  //   Header: (props) => <CustomHeader tableProps={props} title='Destino' className='min-w-150px' />,
+  //   accessor: 'destino',
+  // },
   {
     Header: (props) => <CustomHeader tableProps={props} title='Viático' className='min-w-100px' />,
     accessor: 'tipo_viatico',
@@ -80,7 +84,7 @@ const getColumns = ({
     ),
   },
   {
-    Header: (props) => <CustomHeader tableProps={props} title='HR N°' className='min-w-100px' />,
+    Header: (props) => <CustomHeader tableProps={props} title='HR N°' className='min-w-80px' />,
     accessor: 'rrhh_hoja_ruta_numero',
   },
   {
@@ -90,7 +94,7 @@ const getColumns = ({
   },
   {
     Header: (props) => (
-      <CustomHeader tableProps={props} title='Elaboración' className='min-w-120px' />
+      <CustomHeader tableProps={props} title='Elaboración' className='min-w-180px' />
     ),
     id: 'fecha_elaboracion',
     Cell: ({row}) => <ElaboracionCell declaratoria={row.original} />,

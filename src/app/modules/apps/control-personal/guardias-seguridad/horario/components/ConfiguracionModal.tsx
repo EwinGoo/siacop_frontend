@@ -5,6 +5,8 @@ import Swal from 'sweetalert2'
 import {KTIcon} from 'src/_metronic/helpers'
 import {saveConfiguracion} from '../core/_requests'
 import {ConfiguracionCiclo} from '../core/_models'
+import {GuardiaModalShell} from '../../grupos/grupo-list/components/GuardiaModalShell'
+import {showToast} from 'src/app/utils/toastHelper'
 
 type Props = {
   configuracion: ConfiguracionCiclo | null
@@ -19,6 +21,7 @@ const schema = Yup.object({
 
 const ConfiguracionModal = ({configuracion, onClose, onSaved}: Props) => {
   const [loading, setLoading] = useState(false)
+  const [apiErrors, setApiErrors] = useState<Record<string, string>>({})
 
   const formik = useFormik({
     initialValues: {
@@ -28,12 +31,20 @@ const ConfiguracionModal = ({configuracion, onClose, onSaved}: Props) => {
     validationSchema: schema,
     onSubmit: async (values) => {
       setLoading(true)
+      setApiErrors({})
       try {
         const saved = await saveConfiguracion(values)
         await Swal.fire({icon: 'success', title: 'Configuración guardada', timer: 1500, showConfirmButton: false})
         onSaved(saved)
       } catch (e: any) {
-        Swal.fire({icon: 'error', title: 'Error', text: e?.response?.data?.message || 'No se pudo guardar'})
+        const backendErrors = e?.response?.data?.data
+        if (backendErrors && typeof backendErrors === 'object') {
+          setApiErrors(backendErrors)
+        }
+        showToast({
+          message: e?.response?.data?.message || 'No se pudo guardar la configuración',
+          type: 'error',
+        })
       } finally {
         setLoading(false)
       }
@@ -41,20 +52,23 @@ const ConfiguracionModal = ({configuracion, onClose, onSaved}: Props) => {
   })
 
   return (
-    <>
-      <div className='modal fade show d-block' tabIndex={-1}>
-        <div className='modal-dialog modal-dialog-centered mw-500px'>
-          <div className='modal-content'>
-            <div className='modal-header bg-primary'>
-              <h2 className='fw-bolder text-white'>
-                <KTIcon iconName='setting-2' className='fs-2 me-2 text-white' />
-                Configurar Ciclo de Rotación
-              </h2>
-              <button className='btn btn-icon btn-sm btn-light-danger ms-2' onClick={onClose}>
-                <KTIcon iconName='cross' className='fs-1' />
-              </button>
-            </div>
-            <div className='modal-body mx-5 my-7'>
+    <GuardiaModalShell
+      title='Configurar ciclo de rotación'
+      subtitle='Ajusta la fecha base desde la cual se calcula el horario semanal de guardias.'
+      headerIcon={<KTIcon iconName='calendar' className='fs-1 guardia-modal-icon' />}
+      variant='horario'
+      headerStyle={{background: 'linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%)'}}
+      titleClassName='text-white'
+      subtitleClassName='text-white opacity-75 fs-7'
+      closeButtonClassName='btn-light-primary'
+      closeIconClassName='text-primary'
+      iconBoxStyle={{
+        background: 'rgba(255, 255, 255, 0.16)',
+        border: '1px solid rgba(255, 255, 255, 0.24)',
+      }}
+      onClose={onClose}
+      size='md'
+    >
               <div className='notice d-flex bg-light-warning rounded border-warning border border-dashed p-4 mb-6'>
                 <KTIcon iconName='information-5' className='fs-2tx text-warning me-3' />
                 <div>
@@ -70,12 +84,24 @@ const ConfiguracionModal = ({configuracion, onClose, onSaved}: Props) => {
                   <label className='required fw-bold fs-6 mb-2'>Fecha inicio Ciclo 1 (debe ser lunes)</label>
                   <input
                     type='date'
-                    className={`form-control form-control-solid ${formik.touched.fecha_inicio_ciclo && formik.errors.fecha_inicio_ciclo ? 'is-invalid' : ''}`}
+                    className={`form-control form-control-solid ${
+                      (formik.touched.fecha_inicio_ciclo && formik.errors.fecha_inicio_ciclo) || apiErrors.fecha_inicio_ciclo
+                        ? 'is-invalid'
+                        : ''
+                    }`}
                     {...formik.getFieldProps('fecha_inicio_ciclo')}
+                    onChange={(e) => {
+                      formik.handleChange(e)
+                      if (apiErrors.fecha_inicio_ciclo) {
+                        setApiErrors((prev) => ({...prev, fecha_inicio_ciclo: ''}))
+                      }
+                    }}
                   />
-                  {formik.touched.fecha_inicio_ciclo && formik.errors.fecha_inicio_ciclo && (
+                  {formik.touched.fecha_inicio_ciclo && formik.errors.fecha_inicio_ciclo ? (
                     <div className='text-danger fs-7'>{formik.errors.fecha_inicio_ciclo}</div>
-                  )}
+                  ) : apiErrors.fecha_inicio_ciclo ? (
+                    <div className='text-danger fs-7'>{apiErrors.fecha_inicio_ciclo}</div>
+                  ) : null}
                 </div>
                 <div className='fv-row mb-6'>
                   <label className='fw-bold fs-6 mb-2'>Descripción (opcional)</label>
@@ -87,18 +113,23 @@ const ConfiguracionModal = ({configuracion, onClose, onSaved}: Props) => {
                   />
                 </div>
                 <div className='text-end'>
-                  <button type='button' className='btn btn-light me-3' onClick={onClose}>Cancelar</button>
-                  <button type='submit' className='btn btn-primary' disabled={loading || !formik.isValid}>
-                    {loading ? <><span className='spinner-border spinner-border-sm me-2'></span>Guardando...</> : 'Guardar configuración'}
+                  <button type='button' className='btn btn-light me-3' onClick={onClose}>
+                    <KTIcon iconName='cross' className='fs-4 me-1' />
+                    Cancelar
+                  </button>
+                  <button type='submit' className='btn btn-primary' disabled={loading}>
+                    {loading ? (
+                      <><span className='spinner-border spinner-border-sm me-2'></span>Guardando...</>
+                    ) : (
+                      <>
+                        <KTIcon iconName='check' className='fs-4 me-1' />
+                        Guardar configuración
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className='modal-backdrop fade show'></div>
-    </>
+    </GuardiaModalShell>
   )
 }
 

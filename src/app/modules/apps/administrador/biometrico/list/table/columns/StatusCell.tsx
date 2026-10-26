@@ -7,8 +7,16 @@ type Props = {
 
 const StatusCell: FC<Props> = ({dispositivoBiometrico}) => {
   const getStatusBadge = () => {
+    if (dispositivoBiometrico.estado === 'mantenimiento') {
+      return <span className='badge badge-light-info justify-content-center'>Mantenimiento</span>
+    }
+
+    if (dispositivoBiometrico.estado === 'inactivo') {
+      return <span className='badge badge-light-danger justify-content-center'>Inactivo</span>
+    }
+
     if (!dispositivoBiometrico.ultima_sincronizacion) {
-      return <span className="badge badge-light-warning justify-content-center">Sin sincronizar</span>
+      return <span className='badge badge-light-warning justify-content-center'>Sin conexión reciente</span>
     }
 
     const lastSync = new Date(dispositivoBiometrico.ultima_sincronizacion)
@@ -16,11 +24,11 @@ const StatusCell: FC<Props> = ({dispositivoBiometrico}) => {
     const diffMinutes = (now.getTime() - lastSync.getTime()) / (1000 * 60)
 
     if (diffMinutes < 30) {
-      return <span className="badge badge-light-success justify-content-center">En línea</span>
+      return <span className='badge badge-light-success justify-content-center'>En línea</span>
     } else if (diffMinutes < 60) {
-      return <span className="badge badge-light-warning justify-content-center">Desconectado</span>
+      return <span className='badge badge-light-warning justify-content-center'>Desconectado</span>
     } else {
-      return <span className="badge badge-light-danger justify-content-center">Inactivo</span>
+      return <span className='badge badge-light-danger justify-content-center'>Sin reporte reciente</span>
     }
   }
 
@@ -41,11 +49,13 @@ const StatusCell: FC<Props> = ({dispositivoBiometrico}) => {
   return (
     <div className='d-flex flex-column'>
       {getStatusBadge()}
-      {dispositivoBiometrico.ultima_sincronizacion && (
-        <span className='text-muted fs-8 mt-1 text-center   '>
-          {formatLastSync()}
-        </span>
-      )}
+      <span className='text-muted fs-8 mt-1 text-center'>{formatLastSync()}</span>
+      <span className='text-muted fs-8 mt-1 text-center'>
+        Usuarios: {dispositivoBiometrico.ultima_sincronizacion_usuarios ? 'OK' : 'Pendiente'}
+      </span>
+      <span className='text-muted fs-8 text-center'>
+        Marcaciones: {dispositivoBiometrico.ultima_sincronizacion_marcaciones ? 'OK' : 'Pendiente'}
+      </span>
     </div>
   )
 }

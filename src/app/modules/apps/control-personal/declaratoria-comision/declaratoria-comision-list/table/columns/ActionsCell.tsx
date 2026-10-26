@@ -16,7 +16,9 @@ import {PDFData} from './_columns'
 
 interface ActionsProps {
   declaratoria: any
+  onPreparePDF: (title?: string) => void
   onShowPDF: (pdfData: PDFData) => void
+  onCancelPDF: () => void
   onShowData: (declaratoria: any) => void
   onSetLoading: (declaratoriaId: string, isLoading: boolean) => void
   isLoading: boolean
@@ -24,7 +26,9 @@ interface ActionsProps {
 
 const ActionsCell: FC<ActionsProps> = ({
   declaratoria,
+  onPreparePDF,
   onShowPDF,
+  onCancelPDF,
   onShowData,
   onSetLoading,
   isLoading,
@@ -86,6 +90,7 @@ const ActionsCell: FC<ActionsProps> = ({
 
   const printMutation = useMutation(() => imprimirDeclaratoriaComision(declaratoria.hash), {
     onMutate: () => {
+      onPreparePDF('Declaratoria de Comision')
       onSetLoading(declaratoria.id_declaratoria_comision, true)
     },
     onSuccess: (response) => {
@@ -107,8 +112,9 @@ const ActionsCell: FC<ActionsProps> = ({
     },
     onError: (error: any) => {
       onSetLoading(declaratoria.id_declaratoria_comision, false)
+      onCancelPDF()
       showToast({
-        message: error.response?.data?.message || 'Error al generar el PDF',
+        message: error.response?.data?.message || error.message || 'Error al generar el PDF',
         type: 'error',
       })
     },

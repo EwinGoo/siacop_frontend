@@ -15,7 +15,8 @@ const Footer = () => {
         </span>
         Desarrolladores:
         <a href='mailto:sergiogarciamamani@gmail.com'> GarMaSer</a> |
-        <a href='mailto:adalidalanoca2029@gmail.com'> Adalid Alanoca</a>
+        {/* <a href='mailto:adalidalanoca2029@gmail.com'> Adalid Alanoca</a> */}
+        <a href='mailto:edwinalanocaramrez@gmail.com'> Edwin Alanoca</a>
       </div>
     </>
   )

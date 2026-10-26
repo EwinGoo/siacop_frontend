@@ -1,4 +1,3 @@
-import {useMemo} from 'react'
 import {format} from 'date-fns'
 import {es} from 'date-fns/locale'
 
@@ -27,8 +26,6 @@ export const getLocalDateTime = () => {
 
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }
-
-
 
 const useDateFormatter = () => {
   const defaultOptions = {
@@ -59,18 +56,18 @@ const useDateFormatter = () => {
     })
   }
 
-  const formatLongDate = (date: string | Date) => {
+  const formatLongDate = (date: string | Date | null | undefined) => {
     if (!date) return 'N/A'
     const dateObj = typeof date === 'string' ? new Date(date) : date
     const adjustedDate = adjustToLocalTimezone(dateObj)
     return format(adjustedDate, "d 'de' MMMM 'de' yyyy", {locale: es})
   }
 
-  const formatShortDate = (date: string | Date) => {
+  const formatShortDate = (date: string | Date | null | undefined) => {
     if (!date) return 'N/A'
     const dateObj = typeof date === 'string' ? new Date(date) : date
     const adjustedDate = adjustToLocalTimezone(dateObj)
-    return format(adjustedDate, 'dd/MM/yyyy', {locale: es})
+    return format(adjustedDate, 'dd-MM-yyyy', {locale: es})
   }
 
   // Función para formatear fecha combinando formatos
@@ -94,7 +91,7 @@ const useDateFormatter = () => {
     return format(adjustedDate, formatStr, {locale: es})
   }
 
-  const formatTimeFromString = (timeStr: string): string => {
+  const formatTimeFromString = (timeStr: string | null | undefined): string => {
     if (!timeStr) return ''
     const match = timeStr.match(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/)
     if (!match) {
@@ -104,17 +101,14 @@ const useDateFormatter = () => {
     return timeStr.substring(0, 5)
   }
 
-  return useMemo(
-    () => ({
-      formatToBolivianDate,
-      formatLongDate,
-      formatShortDate,
-      formatDate,
-      formatTime,
-      formatTimeFromString,
-    }),
-    []
-  )
+  return {
+    formatToBolivianDate,
+    formatLongDate,
+    formatShortDate,
+    formatDate,
+    formatTime,
+    formatTimeFromString,
+  }
 }
 
 export default useDateFormatter

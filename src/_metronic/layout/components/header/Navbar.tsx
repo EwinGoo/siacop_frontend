@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import {KTIcon} from '../../../helpers'
-import {HeaderUserMenu, Search, ThemeModeSwitcher} from '../../../partials'
+import {HeaderUserMenu, ThemeModeSwitcher} from '../../../partials'
 import {useLayout} from '../../core'
 import {useAuth} from '../../../../app/modules/auth'
 
@@ -10,7 +10,7 @@ const btnIconClass = 'fs-2'
 
 const Navbar = () => {
   const {config} = useLayout()
-  const {currentUser, logout} = useAuth()
+  const {currentUser} = useAuth()
   const firstChar = currentUser?.first_name?.charAt(0).toUpperCase() ?? ''
 
   return (

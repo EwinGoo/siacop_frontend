@@ -6,6 +6,7 @@ type Props = {
 
 const estadoStyles: Record<string, string> = {
   GENERADO: 'secondary',
+  PENDIENTE: 'primary',
   ENVIADO: 'warning',
   RECEPCIONADO: 'info',
   OBSERVADO: 'danger',

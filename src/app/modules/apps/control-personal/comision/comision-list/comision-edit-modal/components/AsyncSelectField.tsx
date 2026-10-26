@@ -78,7 +78,7 @@ const AsyncSelectField: React.FC<AsyncSelectFieldProps> = ({
       } finally {
         setIsLoading(false)
       }
-    }, 300),
+    }, 500),
     [fetchOptions]
   )
 

@@ -1,3 +1,4 @@
+import Tooltip from '@mui/material/Tooltip'
 import {useQueryResponseData, useQueryResponseLoading, useQueryResponse} from '../core/QueryResponseProvider'
 import {useListView} from '../core/ListViewProvider'
 import {Grupo} from '../core/_models'
@@ -5,30 +6,38 @@ import {ListPagination} from '../components/pagination/ListPagination'
 import {KTCardBody, KTIcon} from '../../../../../../../../_metronic/helpers'
 import {deleteGrupo} from '../core/_requests'
 import {usePermissions} from 'src/app/modules/auth/hooks/usePermissions'
-import Swal from 'sweetalert2'
+import {showConfirmDialog} from 'src/app/utils/swalHelpers.ts'
+import {showToast} from 'src/app/utils/toastHelper'
 
 const COLORES_TURNO = ['badge-light-primary', 'badge-light-warning', 'badge-light-danger', 'badge-light-success']
 
 const GrupoTable = () => {
   const grupos = useQueryResponseData() as Grupo[]
   const isLoading = useQueryResponseLoading()
-  const {setItemIdForUpdate} = useListView()
+  const {openEditModal, openMembersModal} = useListView()
   const {refetch} = useQueryResponse()
   const {guardiaSeguridad} = usePermissions()
 
   const handleDelete = async (grupo: Grupo) => {
-    const result = await Swal.fire({
+    const result = await showConfirmDialog({
       title: '¿Eliminar grupo?',
       text: `Se eliminará "${grupo.nombre}" y sus miembros quedarán sin grupo.`,
       icon: 'warning',
-      showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
       confirmButtonColor: '#f1416c',
+      cancelButtonColor: '#6c757d',
     })
     if (result.isConfirmed) {
-      await deleteGrupo(grupo.id_grupo)
-      refetch()
+      try {
+        await deleteGrupo(grupo.id_guardia_grupo)
+        refetch()
+        showToast({message: 'Grupo eliminado correctamente', type: 'success'})
+      } catch (error: any) {
+        showToast({
+          message: error?.response?.data?.message || 'No se pudo eliminar el grupo',
+          type: 'error',
+        })
+      }
     }
   }
 
@@ -53,7 +62,7 @@ const GrupoTable = () => {
             ) : grupos.map((grupo) => {
               const colorIdx = ((grupo.orden ?? 1) - 1) % COLORES_TURNO.length
               return (
-                <tr key={grupo.id_grupo}>
+                <tr key={grupo.id_guardia_grupo}>
                   <td>
                     <span className={`badge ${COLORES_TURNO[colorIdx]} fs-7 fw-bolder`}>
                       #{grupo.orden}
@@ -79,21 +88,31 @@ const GrupoTable = () => {
                   </td>
                   <td className='text-muted'>{grupo.descripcion || '—'}</td>
                   <td className='text-end'>
-                    <button
-                      className='btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1'
-                      title='Ver / Editar miembros'
-                      onClick={() => setItemIdForUpdate(grupo.id_grupo)}
-                    >
-                      <KTIcon iconName='people' className='fs-3' />
-                    </button>
-                    {guardiaSeguridad.canManage && (
+                    <Tooltip title='Administrar miembros del grupo' arrow placement='top'>
                       <button
-                        className='btn btn-icon btn-bg-light btn-active-color-danger btn-sm'
-                        title='Eliminar'
-                        onClick={() => handleDelete(grupo)}
+                        className='btn btn-icon btn-bg-light btn-active-color-info btn-sm me-1'
+                        onClick={() => openMembersModal(grupo.id_guardia_grupo)}
                       >
-                        <KTIcon iconName='trash' className='fs-3' />
+                        <KTIcon iconName='people' className='fs-3' />
                       </button>
+                    </Tooltip>
+                    <Tooltip title='Editar datos del grupo' arrow placement='top'>
+                      <button
+                        className='btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1'
+                        onClick={() => openEditModal(grupo.id_guardia_grupo)}
+                      >
+                        <KTIcon iconName='pencil' className='fs-3' />
+                      </button>
+                    </Tooltip>
+                    {guardiaSeguridad.canManage && (
+                      <Tooltip title='Eliminar grupo' arrow placement='top'>
+                        <button
+                          className='btn btn-icon btn-bg-light btn-active-color-danger btn-sm'
+                          onClick={() => handleDelete(grupo)}
+                        >
+                          <KTIcon iconName='trash' className='fs-3' />
+                        </button>
+                      </Tooltip>
                     )}
                   </td>
                 </tr>

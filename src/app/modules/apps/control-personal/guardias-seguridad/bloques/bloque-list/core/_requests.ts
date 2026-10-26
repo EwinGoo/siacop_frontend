@@ -29,7 +29,7 @@ const createBloque = (bloque: Bloque): Promise<Bloque | undefined> => {
 }
 
 const updateBloque = (bloque: Bloque): Promise<Bloque | undefined> => {
-  return axios.put(`${BASE_URL}/${bloque.id_bloque}`, bloque).then((res) => res.data.data)
+  return axios.put(`${BASE_URL}/${bloque.id_guardia_bloque}`, bloque).then((res) => res.data.data)
 }
 
 const deleteBloque = (id: ID): Promise<void> => {

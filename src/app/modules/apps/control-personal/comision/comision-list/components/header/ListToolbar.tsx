@@ -1,3 +1,4 @@
+import {useState} from 'react'
 import {useQueryClient, useMutation} from 'react-query'
 import {KTIcon, QUERIES} from '../../../../../../../../_metronic/helpers'
 import {useListView} from '../../core/ListViewProvider'
@@ -14,6 +15,7 @@ import {showAlert} from 'src/app/utils/swalHelpers.ts'
 import {useAuth} from 'src/app/modules/auth/core/Auth'
 import { canManageComisiones } from 'src/app/modules/auth/core/roles/roleDefinitions'
 import { APP_ROLES } from 'src/app/modules/auth/core/roles'
+import {ReactNode} from 'react'
 
 const textApproveHTML = `
   Esta acción cambiará el estado de 
@@ -21,12 +23,18 @@ const textApproveHTML = `
   <span class="badge badge-light-success">APROBADO</span>
 `
 
-const ListToolbar = () => {
-  const {setItemIdForUpdate, setIsShow, setAccion} = useListView()
+type Props = {
+  viewModeToggle?: ReactNode
+  compactMobile?: boolean
+}
+
+const ListToolbar = ({viewModeToggle, compactMobile = false}: Props) => {
+  const {setItemIdForUpdate, setIsShow, setAccion, isMobileViewport} = useListView()
   const queryClient = useQueryClient()
   const {query, refetch} = useQueryResponse()
   const {updateState} = useQueryRequest()
   const {currentUser} = useAuth()
+  const [showSecondaryActions, setShowSecondaryActions] = useState(false)
 
   const canManage = currentUser?.groups 
     ? canManageComisiones(currentUser.groups) 
@@ -113,9 +121,115 @@ const ListToolbar = () => {
     }
   }
 
+  const renderSecondaryActions = () => (
+    <>
+      {canManage && (
+        <>
+          <Button
+            className='btn btn-light-warning d-flex align-items-center justify-content-center'
+            onClick={openReportModal}
+          >
+            <i className='bi bi-file-earmark-text me-2'></i>
+            Generar reporte
+          </Button>
+          <Tooltip title='Aprobar todas las comisiones' arrow placement='top'>
+            <Button
+              className='btn btn-light-success d-flex align-items-center justify-content-center'
+              onClick={handleApprove}
+            >
+              <KTIcon iconName='check' className='fs-2 me-1' />
+              Aprobar
+            </Button>
+          </Tooltip>
+        </>
+      )}
+      <div>
+        <ListFilter />
+      </div>
+    </>
+  )
+
+  if (isMobileViewport) {
+    if (compactMobile) {
+      return (
+        <div className='d-flex align-items-center gap-2'>
+          <button
+            type='button'
+            className={`btn btn-sm d-inline-flex align-items-center justify-content-center flex-shrink-0 ${
+              showSecondaryActions ? 'btn-primary' : 'btn-light'
+            }`}
+            onClick={() => setShowSecondaryActions((prev) => !prev)}
+            title='Mostrar acciones'
+            aria-expanded={showSecondaryActions}
+            style={{width: '44px', minWidth: '44px', height: '44px', padding: 0}}
+          >
+            <i className={`bi ${showSecondaryActions ? 'bi-x-lg' : 'bi-list'} fs-2`}></i>
+          </button>
+
+          <Button
+            variant='primary'
+            className='d-inline-flex align-items-center justify-content-center flex-shrink-0'
+            onClick={openAddModal}
+            title='Agregar comisión'
+            style={{width: '44px', minWidth: '44px', height: '44px', padding: 0}}
+          >
+            <KTIcon iconName='plus' className='fs-2 p-0' />
+          </Button>
+
+          {showSecondaryActions ? (
+            <div
+              className='position-absolute start-0 end-0 bg-body rounded shadow-sm border p-3 mt-2'
+              style={{top: '100%', zIndex: 10}}
+            >
+              <div className='d-grid gap-2 w-100'>
+                {viewModeToggle ? <div className='d-flex justify-content-start'>{viewModeToggle}</div> : null}
+                {renderSecondaryActions()}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )
+    }
+
+    return (
+      <div className='d-flex flex-column gap-3 w-100'>
+        <div className='d-flex align-items-center justify-content-between gap-3 w-100'>
+          <button
+            type='button'
+            className={`btn btn-sm d-inline-flex align-items-center justify-content-center flex-shrink-0 ${
+              showSecondaryActions ? 'btn-primary' : 'btn-light'
+            }`}
+            onClick={() => setShowSecondaryActions((prev) => !prev)}
+            title='Mostrar acciones'
+            aria-expanded={showSecondaryActions}
+            style={{width: '44px', minWidth: '44px', height: '44px', padding: 0}}
+          >
+            <i className={`bi ${showSecondaryActions ? 'bi-x-lg' : 'bi-list'} fs-2`}></i>
+          </button>
+
+          <Button
+            variant='primary'
+            className='flex-grow-1 d-inline-flex align-items-center justify-content-center'
+            onClick={openAddModal}
+            style={{height: '44px'}}
+          >
+            <KTIcon iconName='plus' className='fs-2' />
+            Agregar Comisión
+          </Button>
+        </div>
+
+        {showSecondaryActions ? (
+          <div className='d-grid gap-2 w-100'>
+            {viewModeToggle ? <div className='d-flex justify-content-start'>{viewModeToggle}</div> : null}
+            {renderSecondaryActions()}
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+
   return (
     <div className='row g-2'>
-      {/* ✅ Solo mostrar botones de gestión para administradores y control_personal */}
       {canManage && (
         <>
           <div className='col-12 col-md-auto'>
@@ -134,12 +248,11 @@ const ListToolbar = () => {
           </div>
         </>
       )}
-      
+
       <div className='col-6 col-md-auto text-end'>
         <ListFilter />
       </div>
-      
-      {/* ✅ Botón crear - disponible para todos (excepto docentes administrativos) */}
+
       <div className='col-12 col-md-auto'>
         <Button variant='primary' className='w-100' onClick={openAddModal}>
           <KTIcon iconName='plus' className='fs-2' />

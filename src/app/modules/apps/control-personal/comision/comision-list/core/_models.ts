@@ -2,6 +2,7 @@ import {ID, Response, PaginationState} from 'src/_metronic/helpers'
 import {Dispatch, SetStateAction} from 'react'
 
 export type EstadoType = 'GENERADO' | 'ENVIADO' | 'RECEPCIONADO' | 'APROBADO' | 'OBSERVADO'
+export type ComisionViewMode = 'table' | 'cards'
 
 export type Comision = {
   id_comision?: ID | undefined
@@ -38,7 +39,6 @@ export type Comision = {
 export type SucursalCajaSalud = {
   id_caja_salud_sucursal: ID
   nombre_sucursal: string
-
 }
 
 // Respuesta del Backend para Comisiones
@@ -156,6 +156,19 @@ export interface ProcesarComisionParams {
   fecha?: string
 }
 
+export type ComisionPDFData = {
+  blob: Blob
+  filename: string
+  title?: string
+}
+
+export type ReporteGeneralComisionParams = {
+  fechaInicio: string
+  fechaFin: string
+  estado: string
+  tipoComision: string
+}
+
 export type ListViewContextProps = {
   selected: Array<ID>
   onSelect: (selectedId: ID) => void
@@ -171,8 +184,13 @@ export type ListViewContextProps = {
   disabled: boolean
   isShow: boolean // Tipo explícito para isShow
   setIsShow: Dispatch<SetStateAction<boolean>> // Make sure this is included
-  accion?: 'editar' | 'aprobar' | 'observar' | 'report'
-  setAccion: Dispatch<SetStateAction<'editar' | 'aprobar' | 'observar' | 'report' | undefined>>
+  accion?: 'editar' | 'aprobar' | 'observar' | 'report' | 'ver'
+  setAccion: Dispatch<
+    SetStateAction<'editar' | 'aprobar' | 'observar' | 'report' | 'ver' | undefined>
+  >
+  viewMode: ComisionViewMode
+  setViewMode: Dispatch<SetStateAction<ComisionViewMode>>
+  isMobileViewport: boolean
 }
 
 export const initialListView: ListViewContextProps = {
@@ -187,6 +205,9 @@ export const initialListView: ListViewContextProps = {
   setIsShow: () => {}, // Make sure this is included
   accion: undefined,
   setAccion: () => {},
+  viewMode: 'table',
+  setViewMode: () => {},
+  isMobileViewport: false,
 }
 
 export const estadoOptions = [

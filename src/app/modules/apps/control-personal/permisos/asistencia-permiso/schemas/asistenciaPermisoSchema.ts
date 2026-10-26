@@ -1,5 +1,28 @@
 import * as Yup from 'yup'
 
+const normalizeDate = (value: string | Date): Date => {
+  const date = value instanceof Date ? value : new Date(`${value}T00:00:00`)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+const countBusinessDaysInclusive = (start: string | Date, end: string | Date): number => {
+  const startDate = normalizeDate(start)
+  const endDate = normalizeDate(end)
+
+  let businessDays = 0
+  const current = new Date(startDate)
+
+  while (current <= endDate) {
+    const dayOfWeek = current.getDay()
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      businessDays += 1
+    }
+    current.setDate(current.getDate() + 1)
+  }
+
+  return businessDays
+}
+
 // export const asistenciaPermisoSchema = ({isAdmin = false}: {isAdmin: boolean}) =>
 export const asistenciaPermisoSchema = ({
   isAdmin,
@@ -8,7 +31,6 @@ export const asistenciaPermisoSchema = ({
   isAdmin: boolean
   limiteDias?: number | null
 }) => {
-
   return Yup.object().shape({
     id_persona: Yup.number().when([], {
       is: () => isAdmin,
@@ -30,11 +52,8 @@ export const asistenciaPermisoSchema = ({
           if (!limiteDias) return true // sin límite, validación pasa
           if (!value || !this.parent.fecha_inicio_permiso) return true
 
-          const fechaInicio = new Date(this.parent.fecha_inicio_permiso)
-          const fechaFin = new Date(value)
-          const diffTime = fechaFin.getTime() - fechaInicio.getTime()
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 // +1 para contar ambos días
-          return diffDays <= limiteDias
+          const businessDays = countBusinessDaysInclusive(this.parent.fecha_inicio_permiso, value)
+          return businessDays <= limiteDias
         }
       ),
   })

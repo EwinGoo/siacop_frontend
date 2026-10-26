@@ -3,8 +3,15 @@ import {ReportModalHeader} from './ReportModalHeader'
 import {ReportModalFormWrapper} from './ReportModalFormWrapper'
 import Modal from 'react-bootstrap/Modal'
 import {useListView} from '../core/ListViewProvider'
+import {PermisoPDFData} from '../core/_models'
 
-const ReportModal = () => {
+type Props = {
+  onPreparePDF: (title?: string) => void
+  onShowPDF: (pdfData: PermisoPDFData) => void
+  onCancelPDF: () => void
+}
+
+const ReportModal = ({onPreparePDF, onShowPDF, onCancelPDF}: Props) => {
   const {accion, setItemIdForUpdate, setIsShow, isShow} = useListView()
   const [, setSelectedType] = useState<string | null>(null)
 
@@ -30,7 +37,12 @@ const ReportModal = () => {
         </Modal.Header>
 
         <Modal.Body>
-          <ReportModalFormWrapper onClose={handleClose} />
+          <ReportModalFormWrapper
+            onClose={handleClose}
+            onPreparePDF={onPreparePDF}
+            onShowPDF={onShowPDF}
+            onCancelPDF={onCancelPDF}
+          />
         </Modal.Body>
       </Modal>
     )

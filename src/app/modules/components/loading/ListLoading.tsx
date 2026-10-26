@@ -1,27 +1,45 @@
-import { useEffectiveTheme } from 'src/app/hooks/useEffectiveTheme'
+import {CSSProperties} from 'react'
+import {useEffectiveTheme} from 'src/app/hooks/useEffectiveTheme'
 
-const ListLoading = () => {
+type Props = {
+  message?: string
+  overlay?: boolean
+}
+
+const ListLoading = ({message: _message, overlay = true}: Props) => {
   const {isDark} = useEffectiveTheme()
-  
 
-  const styles = {
-    borderRadius: '0.475rem',
-    boxShadow: isDark
-      ? '0 0 50px 0 rgba(0, 0, 0, 0.3)'
-      : '0 0 50px 0 rgb(82 63 105 / 15%)',
-    backgroundColor: isDark ? '#1e1e2d' : '#fff',
-    color: isDark ? '#a1a5b7' : '#7e8299',
-    fontWeight: 500,
-    margin: 0,
-    width: 'auto',
-    padding: '1rem 2rem',
-    top: 'calc(50% - 2rem)',
-    left: 'calc(50% - 4rem)',
-    position: 'absolute' as const,
-    textAlign: 'center' as const,
+  const wrapperStyles: CSSProperties = overlay
+    ? {
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: isDark ? 'rgba(21, 21, 33, 0.12)' : 'rgba(249, 249, 249, 0.55)',
+        backdropFilter: 'blur(0.5px)',
+        zIndex: 5,
+      }
+    : {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '180px',
+      }
+
+  const spinnerStyles: CSSProperties = {
+    width: '2.25rem',
+    height: '2.25rem',
+    borderWidth: '0.22rem',
   }
 
-  return <div style={styles}>Cargando...</div>
+  return (
+    <div style={wrapperStyles}>
+      <div className='spinner-border text-primary' role='status' style={spinnerStyles}>
+        <span className='visually-hidden'>Cargando</span>
+      </div>
+    </div>
+  )
 }
 
 export {ListLoading}

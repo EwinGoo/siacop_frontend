@@ -33,30 +33,30 @@ const ListSearchComponent = () => {
   )
 
   return (
-    <div className='card-title'>
+    <div className='d-flex align-items-center gap-3 w-100 flex-nowrap'>
       <button
         type='button'
-        className='btn btn-light btn-sm mx-2'
+        className='btn btn-light btn-sm d-inline-flex align-items-center justify-content-center flex-shrink-0'
         onClick={() => {
           queryClient.invalidateQueries([`${QUERIES.VACACIONES_LIST}-${query}`])
         }}
         title='Actualizar tabla'
+        style={{width: '44px', minWidth: '44px', height: '44px', padding: 0}}
       >
         <KTIcon iconName='arrows-circle' className='fs-1' />
       </button>
-      {/* begin::Search */}
-      <div className='d-flex align-items-center position-relative my-1'>
+      <div className='d-flex align-items-center position-relative flex-grow-1'>
         <KTIcon iconName='magnifier' className='fs-1 position-absolute ms-6' />
         <input
           type='text'
           data-kt-user-table-filter='search'
-          className='form-control form-control-solid w-300px ps-14'
+          className='form-control form-control-solid ps-14 pe-14'
           placeholder='Buscar por nombre o CI...'
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          style={{width: '100%', minWidth: 0, height: '44px'}}
         />
       </div>
-      {/* end::Search */}
     </div>
   )
 }

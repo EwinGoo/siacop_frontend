@@ -156,8 +156,15 @@ const EditModalForm: FC<Props> = ({declaratoria, unidades, isDeclaratoriaLoading
     },
   })
 
+  const shouldShowFieldError = (fieldName: string) => {
+    return Boolean(getFieldError(formik.errors, fieldName)) && (
+      Boolean(formik.touched[fieldName]) ||
+      formik.submitCount > 0
+    )
+  }
+
   const isFieldValid = (fieldName: string) => {
-    return !(formik.touched[fieldName] && getFieldError(formik.errors, fieldName))
+    return !shouldShowFieldError(fieldName)
   }
 
   const handleChange = (fieldName: keyof DeclaratoriaComision) => (value: any) => {

@@ -28,7 +28,7 @@ const BloqueTable = () => {
       confirmButtonColor: '#f1416c',
     })
     if (result.isConfirmed) {
-      await deleteBloque(bloque.id_bloque)
+      await deleteBloque(bloque.id_guardia_bloque)
       refetch()
     }
   }
@@ -59,7 +59,7 @@ const BloqueTable = () => {
               </tr>
             ) : (
               bloques.map((bloque) => (
-                <tr key={bloque.id_bloque}>
+                <tr key={bloque.id_guardia_bloque}>
                   <td>
                     <div className='d-flex align-items-center'>
                       <span className='badge badge-light-primary me-3'>
@@ -75,7 +75,7 @@ const BloqueTable = () => {
                         <button
                           className='btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1'
                           title='Editar'
-                          onClick={() => setItemIdForUpdate(bloque.id_bloque)}
+                          onClick={() => setItemIdForUpdate(bloque.id_guardia_bloque)}
                         >
                           <KTIcon iconName='pencil' className='fs-3' />
                         </button>

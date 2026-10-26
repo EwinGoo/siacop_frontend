@@ -4,6 +4,7 @@ import {Modal} from 'react-bootstrap'
 interface PDFModalProps {
   isOpen: boolean
   onClose: () => void
+  isPreparing?: boolean
   pdfBase64: string
   filename: string
   title?: string
@@ -12,6 +13,7 @@ interface PDFModalProps {
 const PDFModal: React.FC<PDFModalProps> = ({
   isOpen,
   onClose,
+  isPreparing = false,
   pdfBase64,
   filename,
   title = 'Vista de PDF',
@@ -39,6 +41,13 @@ const PDFModal: React.FC<PDFModalProps> = ({
   }, [])
 
   useEffect(() => {
+    if (isPreparing) {
+      setPdfUrl('')
+      setIsLoading(true)
+      setError('')
+      return
+    }
+
     if (pdfBase64 && isOpen) {
       try {
         setIsLoading(true)
@@ -71,7 +80,7 @@ const PDFModal: React.FC<PDFModalProps> = ({
         URL.revokeObjectURL(pdfUrl)
       }
     }
-  }, [pdfBase64, isOpen])
+  }, [pdfBase64, isOpen, isPreparing])
 
   const handleDownload = () => {
     if (pdfUrl) {
@@ -256,7 +265,7 @@ const PDFModal: React.FC<PDFModalProps> = ({
       </Modal.Header>
 
       <Modal.Body className='p-0' style={{height: isMobile ? 'auto' : '80vh'}}>
-        {isLoading && (
+        {(isPreparing || isLoading) && (
           <div
             className='d-flex justify-content-center align-items-center h-100'
             style={{minHeight: '300px'}}
@@ -265,7 +274,7 @@ const PDFModal: React.FC<PDFModalProps> = ({
               <div className='spinner-border text-primary mb-3' role='status'>
                 <span className='visually-hidden'>Cargando...</span>
               </div>
-              <p className='text-muted'>Generando PDF...</p>
+              <p className='text-muted'>{isPreparing ? 'Preparando documento...' : 'Generando PDF...'}</p>
             </div>
           </div>
         )}
@@ -285,7 +294,7 @@ const PDFModal: React.FC<PDFModalProps> = ({
           </div>
         )}
 
-        {!isLoading && !error && pdfUrl && (isMobile ? renderMobileView() : renderDesktopView())}
+        {!isPreparing && !isLoading && !error && pdfUrl && (isMobile ? renderMobileView() : renderDesktopView())}
       </Modal.Body>
 
       {!isMobile && (
@@ -300,7 +309,7 @@ const PDFModal: React.FC<PDFModalProps> = ({
                 type='button'
                 className='btn btn-sm btn-light-secondary'
                 onClick={handleOpenInNewTab}
-                disabled={isLoading || !!error}
+                disabled={isPreparing || isLoading || !!error}
                 title='Abrir en nueva pestaña'
               >
                 <i className='las la-external-link-alt fs-4'></i>
@@ -310,7 +319,7 @@ const PDFModal: React.FC<PDFModalProps> = ({
                 type='button'
                 className='btn btn-sm btn-light-primary me-2'
                 onClick={handleDownload}
-                disabled={isLoading || !!error}
+                disabled={isPreparing || isLoading || !!error}
                 title='Descargar PDF'
               >
                 <i className='las la-download fs-4'></i>
@@ -320,7 +329,7 @@ const PDFModal: React.FC<PDFModalProps> = ({
                 type='button'
                 className='btn btn-sm btn-light-info me-2'
                 onClick={handlePrintOptimized}
-                disabled={isLoading || !!error}
+                disabled={isPreparing || isLoading || !!error}
                 title='Imprimir PDF'
               >
                 <i className='las la-print fs-4'></i>

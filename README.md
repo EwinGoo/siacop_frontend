@@ -1,49 +1,181 @@
-# Getting Started with Create React App
+﻿# SIACOP V3 - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Frontend web de `SIACOP V3`, desarrollado como una SPA en React para modernizar los modulos de control personal, planilla de asistencia, bono refrigerio y procesos administrativos relacionados.
 
-## Available Scripts
+Este proyecto vive en:
 
-In the project directory, you can run:
+```text
+C:\Users\az232\Desktop\siacop\siacop_frontend
+```
 
-### `yarn start`
+## Tecnologia principal
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- React `18.0.0`
+- TypeScript `4.7`
+- Create React App con `react-scripts`
+- Metronic React `8.2.0` adaptado al sistema SIACOP
+- Bootstrap `5.3`
+- React Router DOM `6.3`
+- React Query `3.38`
+- Axios
+- Formik + Yup
+- React Table
+- SweetAlert2
+- html5-qrcode
+- Socket.IO Client
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Importante: este frontend **no usa Vite**. El arranque, pruebas y compilacion se realizan con `react-scripts`.
 
-### `yarn test`
+## Version activa
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Nombre del paquete: `siacop-frontend`
+- Version del frontend: `3.0.0`
+- Ruta publica configurada: `/siacop-v3`
 
-### `yarn build`
+La ruta publica se define en `package.json`:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```json
+"homepage": "/siacop-v3"
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Relacion con el backend
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+El backend principal vive en:
 
-### `yarn eject`
+```text
+C:\Users\az232\Desktop\siacop\siacop_backend
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+El frontend se integra con el backend mediante sesion compartida de CodeIgniter Shield. React no maneja un login independiente para el flujo normal; consume la sesion activa del backend usando cookies y `withCredentials`.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Flujo general:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```text
+Usuario -> siacop_backend login -> siacop_frontend React -> ApiSiacop -> base_siacop / api_base_upea
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Build y despliegue
 
-## Learn More
+El build generado por React debe publicarse dentro del backend, recomendado como:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```text
+C:\Users\az232\Desktop\siacop\siacop_backend\public\siacop-v3
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Si se cambia esta carpeta, tambien se debe revisar el controlador del backend que sirve la SPA, especialmente la referencia al `index.html` del build.
 
+## Scripts disponibles
 
+Instalar dependencias:
 
+```bash
+npm install
+```
+
+Levantar en desarrollo:
+
+```bash
+npm start
+```
+
+Ejecutar pruebas:
+
+```bash
+npm test
+```
+
+Verificar formato:
+
+```bash
+npm run lint
+```
+
+Formatear codigo:
+
+```bash
+npm run format
+```
+
+Generar build de produccion:
+
+```bash
+npm run build
+```
+
+Nota del proyecto: no ejecutar `npm run build` salvo que sea solicitado explicitamente.
+
+## Variables de entorno relevantes
+
+El frontend usa variables `.env` para conectarse con el backend y servicios auxiliares.
+
+Variables principales:
+
+```text
+REACT_APP_API_URL
+REACT_APP_SOCKET_URL
+REACT_APP_ENVIRONMENT
+REACT_APP_THEME_API_URL
+```
+
+En Create React App, las variables disponibles para el navegador deben iniciar con `REACT_APP_`.
+
+## Modulos principales de SIACOP V3
+
+- Autenticacion compartida con backend
+- Proteccion de rutas por roles y permisos
+- Biometricos y administracion ZKTeco
+- Feriados y asuetos
+- Tipos de permiso
+- Permisos administrativos
+- Boletas de comision
+- Declaratoria en comision
+- Asignaciones administrativas
+- Gestion QR
+- Guardias de seguridad
+- Reporte de vacaciones
+- Planilla de asistencia
+- Bono refrigerio
+- Reportes PDF integrados
+
+## Estructura importante
+
+```text
+src/app/routing
+src/app/config/apiRoutes.ts
+src/app/services/axiosClient.ts
+src/app/modules/auth
+src/app/modules/apps/control-personal
+src/app/modules/apps/administrador
+public/media
+doc
+```
+
+## Documentacion interna
+
+Documentacion general:
+
+```text
+doc/frontend.md
+doc/backend.md
+doc/DOCUMENTACION_GENERAL_IMPLEMENTACION.md
+```
+
+Documentacion de vistas:
+
+```text
+doc/frontend/
+```
+
+Cada nueva vista o modulo relevante debe documentarse en `doc/frontend/` usando prefijo numerico, por ejemplo:
+
+```text
+10_NUEVA_VISTA.md
+```
+
+## Notas de mantenimiento
+
+- Mantener `axiosClient` para peticiones que dependan de cookies, interceptores o manejo comun de errores.
+- No exponer llaves de `api_base_upea` en el frontend.
+- El frontend no debe consumir directamente `api_base_upea`; debe pasar por `siacop_backend`.
+- Revisar `public/media` antes de eliminar assets, porque Metronic incluye muchos recursos demo no usados.
+- Evitar dejar `console.log`, archivos `copy`, pruebas manuales o rutas `localhost` en configuracion de produccion.

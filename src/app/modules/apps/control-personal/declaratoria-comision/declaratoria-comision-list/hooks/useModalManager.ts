@@ -17,10 +17,21 @@ export const useModalManager = () => {
   const [currentPDFData, setCurrentPDFData] = useState<PDFData | null>(null)
   const [currentDeclaratoria, setCurrentDeclaratoria] = useState<any>(null)
   const [loadingStates, setLoadingStates] = useState<LoadingState>({})
+  const [isPreparingPDF, setIsPreparingPDF] = useState(false)
+  const [pdfTitle, setPdfTitle] = useState('Declaratoria de Comision')
 
   // Handlers optimizados con useCallback para evitar re-renders innecesarios
+  const handlePreparePDF = useCallback((title = 'Declaratoria de Comision') => {
+    setPdfTitle(title)
+    setCurrentPDFData(null)
+    setIsPreparingPDF(true)
+    setShowPDFModal(true)
+  }, [])
+
   const handleShowPDF = useCallback((pdfData: PDFData) => {
+    setPdfTitle('Declaratoria de Comision')
     setCurrentPDFData(pdfData)
+    setIsPreparingPDF(false)
     setShowPDFModal(true)
   }, [])
 
@@ -30,8 +41,15 @@ export const useModalManager = () => {
   }, [])
 
   const handleClosePDFModal = useCallback(() => {
+    setIsPreparingPDF(false)
     setShowPDFModal(false)
     // Limpiar después de un pequeño delay para animación
+    setTimeout(() => setCurrentPDFData(null), 300)
+  }, [])
+
+  const handleCancelPDF = useCallback(() => {
+    setIsPreparingPDF(false)
+    setShowPDFModal(false)
     setTimeout(() => setCurrentPDFData(null), 300)
   }, [])
 
@@ -65,6 +83,8 @@ export const useModalManager = () => {
     
     // Handlers
     handleShowPDF,
+    handlePreparePDF,
+    handleCancelPDF,
     handleShowData,
     handleClosePDFModal,
     handleCloseDataModal,
@@ -76,9 +96,10 @@ export const useModalManager = () => {
     pdfModalProps: {
       isOpen: showPDFModal,
       onClose: handleClosePDFModal,
+      isPreparing: isPreparingPDF,
       pdfBase64: currentPDFData?.base64 || '',
       filename: currentPDFData?.filename || '',
-      title: "Declaratoria de Comisión"
+      title: pdfTitle
     },
     
     dataModalProps: {

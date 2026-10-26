@@ -7,6 +7,7 @@ import {
   AsistenciaPermisoBackendData,
   ProcesarComisionParams,
   AutocompleteResponse,
+  PermisoPDFData,
 } from './_models'
 import {API_ROUTES, API_BASE_URL} from 'src/app/config/apiRoutes'
 import {TipoPermiso} from '../../../tipos-permisos/list/core/_models'
@@ -66,8 +67,11 @@ const createAsistenciaPermiso = async (
     return response.data.data
   } catch (error: any) {
     if (error.response?.status === 422 || error.response?.status === 400) {
+      const validationErrors =
+        error.response.data.validation_errors || error.response.data.data || {}
+
       throw new ValidationError(
-        error.response.data.validation_errors || {},
+        validationErrors,
         error.response.data.message
       )
     }
@@ -75,13 +79,27 @@ const createAsistenciaPermiso = async (
   }
 }
 
-const updateAsistenciaPermiso = (
+const updateAsistenciaPermiso = async (
   asistenciaPermiso: AsistenciaPermiso
 ): Promise<AsistenciaPermiso | undefined> => {
-  return axios
-    .put(`${ASISTENCIA_PERMISO_URL}/${asistenciaPermiso.id_asistencia_permiso}`, asistenciaPermiso)
-    .then((response: AxiosResponse<Response<AsistenciaPermiso>>) => response.data)
-    .then((response: Response<AsistenciaPermiso>) => response.data)
+  try {
+    const response = await axiosClient.put(
+      `${ASISTENCIA_PERMISO_URL}/${asistenciaPermiso.id_asistencia_permiso}`,
+      asistenciaPermiso
+    )
+    return response.data.data
+  } catch (error: any) {
+    if (error.response?.status === 422 || error.response?.status === 400) {
+      const validationErrors =
+        error.response.data.validation_errors || error.response.data.data || {}
+
+      throw new ValidationError(
+        validationErrors,
+        error.response.data.message
+      )
+    }
+    throw error
+  }
 }
 
 const deleteAsistenciaPermiso = (asistenciaPermisoId: ID): Promise<void> => {
@@ -171,6 +189,75 @@ const aprobarSelectedPermisos = async (
   }
 }
 
+const buildPermisoFilename = (identifier: string): string => {
+  const safeIdentifier = identifier.replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase()
+  return `PERMISO_${safeIdentifier}.PDF`
+}
+
+const getBlobErrorMessage = async (error: any): Promise<string> => {
+  const data = error?.response?.data
+
+  if (data instanceof Blob) {
+    const text = await data.text()
+    try {
+      const parsed = JSON.parse(text)
+      return parsed.message || 'Datos personales no disponibles. Intente más tarde.'
+    } catch {
+      return text || 'Datos personales no disponibles. Intente más tarde.'
+    }
+  }
+
+  return error?.response?.data?.message || 'Datos personales no disponibles. Intente más tarde.'
+}
+
+const imprimirPermisoFormulario = async (
+  hash: string,
+  carnet?: string | null
+): Promise<PermisoPDFData> => {
+  try {
+    const response = await axiosClient.get<Blob>(`${ASISTENCIA_PERMISO_URL}/reporte/${hash}`, {
+      responseType: 'blob',
+    })
+
+    return {
+      blob: response.data,
+      filename: buildPermisoFilename(carnet || hash),
+      title: 'Permiso',
+    }
+  } catch (error: any) {
+    throw new Error(await getBlobErrorMessage(error))
+  }
+}
+
+const generarReporteGeneralPermiso = async (params: {
+  fechaInicio: string
+  fechaFin: string
+  estado: string
+  tipoPermiso: string
+}): Promise<PermisoPDFData> => {
+  try {
+    const formData = new FormData()
+    formData.append('fechaInicio', params.fechaInicio)
+    formData.append('fechaFin', params.fechaFin)
+    formData.append('estado', params.estado)
+    formData.append('tipoPermiso', params.tipoPermiso)
+
+    const response = await axiosClient.post<Blob>(
+      `${ASISTENCIA_PERMISO_URL}/reporte-general`,
+      formData,
+      {responseType: 'blob'}
+    )
+
+    return {
+      blob: response.data,
+      filename: 'REPORTE_PERMISOS.PDF',
+      title: 'Reporte de permisos',
+    }
+  } catch (error: any) {
+    throw new Error(await getBlobErrorMessage(error))
+  }
+}
+
 const getPersonaAutocomplete = async (termino: string): Promise<AutocompleteResponse> => {
   try {
     const response = await axiosClient.get(
@@ -209,4 +296,6 @@ export {
   aprobarComisiones,
   aprobarSelectedPermisos,
   getPersonaAutocomplete,
+  imprimirPermisoFormulario,
+  generarReporteGeneralPermiso,
 }

@@ -113,7 +113,7 @@ export const ObservarModal = () => {
                 Detalles de la comisión
               </h6>
               <p className='mb-1'>
-                <strong>Codigo:</strong> {comision.id_comision || 'N/D'}
+                <strong>Codigo:</strong> {comision.id_temporal || 'N/D'}
               </p>
               <p className='mb-1'>
                 <strong>Generado por:</strong> {comision.nombre_generador || 'N/D'}

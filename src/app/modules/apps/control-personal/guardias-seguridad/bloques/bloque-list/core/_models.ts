@@ -1,7 +1,7 @@
 import {ID, PaginationState} from '../../../../../../../../_metronic/helpers'
 
 export type Bloque = {
-  id_bloque?: ID
+  id_guardia_bloque?: ID
   nombre?: string
   descripcion?: string | null
   created_at?: string

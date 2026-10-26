@@ -6,13 +6,14 @@
  */
 
 import {FC} from 'react'
-import {Routes, Route, BrowserRouter, Navigate} from 'react-router-dom'
+import {Route, BrowserRouter, Navigate} from 'react-router-dom'
 import {PrivateRoutes} from './PrivateRoutes'
 import {ErrorsPage} from '../modules/errors/ErrorsPage'
 import {Logout, useAuth} from '../modules/auth'
 import {App} from '../App'
 import {ExternalRedirect} from './components/ExternalRedirect'
-import {API_URL} from '../config/apiRoutes'
+import {API_URL, BACKEND_LOGIN_URL} from '../config/apiRoutes'
+import {getInstrumentedRoutesRenderer} from '../config/runtimeMonitoring'
 
 /**
  * Base URL of the website.
@@ -24,27 +25,34 @@ const enviroment = process.env.REACT_APP_ENVIRONMENT || ''
 
 const AppRoutes: FC = () => {
   const {currentUser} = useAuth()
+  const archivoInicio = currentUser?.groups?.includes('operador_archivo')
+    ? '/apps/archivo-central'
+    : currentUser?.groups?.includes('auditoria')
+    ? '/apps/auditoria'
+    : undefined
+  const RoutesRenderer = getInstrumentedRoutesRenderer()
   return (
     <BrowserRouter>
-      <Routes>
+      <RoutesRenderer>
         <Route element={<App />}>
           <Route path='error/*' element={<ErrorsPage />} />
           <Route path='logout' element={<Logout />} />
           {currentUser ? (
             <>
-              {enviroment === 'production' && (
+              {archivoInicio && <Route index element={<Navigate to={archivoInicio} replace />} />}
+              {!archivoInicio && enviroment === 'production' && (
                 <Route index element={<ExternalRedirect url={`${API_URL}`} />} />
               )}
               <Route path='/*' element={<PrivateRoutes />} />
-              {enviroment === 'development' && (
+              {!archivoInicio && enviroment === 'development' && (
                 <Route index element={<Navigate to='/dashboard' />} />
               )}
               {/* <Route index element={<Navigate to='/principal' />} /> */}
             </>
           ) : (
             <>
-              <Route path='*' element={<ExternalRedirect url={`${API_URL}/login`} />} />
-              <Route path='auth/*' element={<ExternalRedirect url={`${API_URL}/login`} />} />
+              <Route path='*' element={<ExternalRedirect url={BACKEND_LOGIN_URL} />} />
+              <Route path='auth/*' element={<ExternalRedirect url={BACKEND_LOGIN_URL} />} />
               {/* <Route path='auth/*' element={<AuthPage />} />
               <Route path='auth/*' element={<AuthPage />} />
               <Route path='auth/*' element={<AuthPage />} />
@@ -52,7 +60,7 @@ const AppRoutes: FC = () => {
             </>
           )}
         </Route>
-      </Routes>
+      </RoutesRenderer>
     </BrowserRouter>
   )
 }

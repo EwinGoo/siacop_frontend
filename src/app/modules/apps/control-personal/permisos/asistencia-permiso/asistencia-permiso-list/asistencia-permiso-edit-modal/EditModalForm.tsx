@@ -38,7 +38,7 @@ type Props = {
 interface OptionType {
   value: number
   label: string
-  // id_persona?: ID
+  tipo_personal?: string
 }
 
 const EditModalForm: FC<Props> = ({
@@ -143,8 +143,6 @@ const EditModalForm: FC<Props> = ({
 
   const fetchPersonaOptions = async (input: string): Promise<OptionType[]> => {
     const response = await getPersonaAutocomplete(input)
-    console.log(response.data)
-
     return response.data.map((item) => ({
       value: item.id,
       label: item.texto,
@@ -152,8 +150,15 @@ const EditModalForm: FC<Props> = ({
     }))
   }
 
+  const shouldShowFieldError = (fieldName: string) => {
+    return Boolean(getFieldError(formik.errors, fieldName)) && (
+      Boolean(formik.touched[fieldName]) ||
+      formik.submitCount > 0
+    )
+  }
+
   const isFieldValid = (fieldName: string) => {
-    return !(formik.touched[fieldName] && getFieldError(formik.errors, fieldName))
+    return !shouldShowFieldError(fieldName)
   }
 
   const handleChange = (fieldName: keyof AsistenciaPermiso) => (value: any) => {

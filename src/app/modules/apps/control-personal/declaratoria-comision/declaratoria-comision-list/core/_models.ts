@@ -110,3 +110,16 @@ export const initialDeclaratoriaComision: DeclaratoriaComision = {
 //   destino: 'UMSA',
 //   motivo: 'Congreso de universidades',
 // }
+
+export type DeclaratoriaComisionPDFData = {
+  blob: Blob
+  filename: string
+  title?: string
+}
+
+export type ReporteGeneralDeclaratoriaParams = {
+  fechaInicio: string
+  fechaFin: string
+  estado: string
+  tipoViatico: string
+}

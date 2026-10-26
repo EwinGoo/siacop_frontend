@@ -35,7 +35,7 @@ const InfoCell: FC<Props> = ({asistenciaPermiso}) => {
 
       <div className='d-flex flex-column'>
         <p className='text-gray-800 text-hover-primary fw-bolder mb-1 fs-6 text-uppercase'>
-          {asistenciaPermiso.tipo_permiso_nombre || 'Comisión sin descripción'}
+          {asistenciaPermiso.tipo_permiso_nombre || 'Permiso sin descripción'}
         </p>
       </div>
     </div>

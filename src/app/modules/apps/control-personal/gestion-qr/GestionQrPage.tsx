@@ -1,9 +1,14 @@
-import React, { useEffect } from 'react'
+import React, {lazy, Suspense, useEffect} from 'react'
 import {PageLink, PageTitle} from 'src/_metronic/layout/core'
-import {QRScannerPanel} from './components/QRScanner'
 import {ControlPanel} from './components/ControlPanel'
 import {UltimoCodigoCard, HistorialCard} from './components/Cards'
 import {useQRScanner} from './hooks'
+
+const QRScannerPanel = lazy(() =>
+  import('./components/QRScanner/QRScannerPanel').then((module) => ({
+    default: module.QRScannerPanel,
+  }))
+)
 
 const GestionQrPage: React.FC = () => {
   const gestionQRBreadcrumbs: Array<PageLink> = [
@@ -56,11 +61,39 @@ const GestionQrPage: React.FC = () => {
       <div className='row g-6'>
         {/* Panel principal del escáner */}
         <div className='col-xl-8'>
-          <QRScannerPanel
-            modoRecepcion={modoRecepcion}
-            tipoPermiso={tipoPermiso}
-            onQRDetected={handleQRDetected}
-          />
+          <Suspense
+            fallback={
+              <div className='card'>
+                <div className='card-header'>
+                  <div className='card-title'>
+                    <h3 className='fw-bold mb-0'>
+                      <i className='bi bi-qr-code-scan me-3 text-primary'></i>
+                      Escaner de Codigos QR
+                    </h3>
+                  </div>
+                </div>
+                <div className='card-body'>
+                  <div className='alert alert-primary d-flex align-items-center mb-4'>
+                    <i className='bi bi-hourglass-split me-2'></i>
+                    <span>Cargando modulo de escaneo...</span>
+                  </div>
+                  <div
+                    className='bg-light rounded d-flex flex-column justify-content-center align-items-center text-muted'
+                    style={{minHeight: '420px'}}
+                  >
+                    <div className='spinner-border text-primary mb-3' role='status' />
+                    <span>Preparando la camara y el lector QR.</span>
+                  </div>
+                </div>
+              </div>
+            }
+          >
+            <QRScannerPanel
+              modoRecepcion={modoRecepcion}
+              tipoPermiso={tipoPermiso}
+              onQRDetected={handleQRDetected}
+            />
+          </Suspense>
         </div>
 
         {/* Panel de información y controles */}

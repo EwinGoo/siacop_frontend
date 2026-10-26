@@ -2,7 +2,7 @@ import useDateFormatter from 'src/app/hooks/useDateFormatter'
 import clsx from 'clsx'
 
 export const DateCell = ({feriadoAsueto}) => {
-  const {formatLongDate} = useDateFormatter()
+  const {formatShortDate} = useDateFormatter()
 
   return feriadoAsueto.tipo_evento === 'FERIADO' ? (
     <div
@@ -20,17 +20,17 @@ export const DateCell = ({feriadoAsueto}) => {
     >
       <div className='mb-2'>
         <i className='fas fa-calendar-alt text-primary me-2' />
-        Inicio: <span className='fw-bold'>{formatLongDate(feriadoAsueto.fecha_inicio)}</span>
+        Inicio: <span className='fw-bold'>{formatShortDate(feriadoAsueto.fecha_inicio)}</span>
       </div>
       <div>
         <i className='fas fa-calendar-check text-primary me-2' />
-        Fin: <span className='fw-bold'>{formatLongDate(feriadoAsueto.fecha_fin)}</span>
+        Fin: <span className='fw-bold'>{formatShortDate(feriadoAsueto.fecha_fin)}</span>
       </div>
     </div>
   ) : (
     <div className='mb-2 min-w-100px'>
       <i className='fas fa-calendar-check text-primary me-2' />
-      <span className='fw-bold'>{formatLongDate(feriadoAsueto.fecha_evento)}</span>
+      <span className='fw-bold'>{formatShortDate(feriadoAsueto.fecha_evento)}</span>
     </div>
   )
 }

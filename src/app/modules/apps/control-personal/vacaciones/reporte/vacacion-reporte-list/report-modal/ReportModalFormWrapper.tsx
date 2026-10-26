@@ -4,6 +4,7 @@ import axiosClient from 'src/app/services/axiosClient'
 import {API_ROUTES} from 'src/app/config/apiRoutes'
 import {ReportModalForm} from './ReportModalForm'
 import {getLocalDate} from 'src/app/hooks/useDateFormatter'
+import Swal from 'sweetalert2'
 
 const validationSchema = Yup.object().shape({
   fecha_desde: Yup.mixed().required('La fecha de inicio es requerida'),
@@ -55,6 +56,12 @@ export const ReportModalFormWrapper = ({onClose, onPdfReady}: Props) => {
         onPdfReady(blobUrl)
       } catch (error) {
         console.error('Error al generar el reporte:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo generar el reporte',
+          text: 'Verifique los filtros seleccionados o intente nuevamente.',
+          confirmButtonText: 'Aceptar',
+        })
       } finally {
         setSubmitting(false)
       }

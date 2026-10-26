@@ -1,3 +1,4 @@
+import {handleAuthError} from '../../../services/axiosClient'
 import {AuthModel} from './_models'
 
 const AUTH_LOCAL_STORAGE_KEY = 'kt-auth-react-v'
@@ -27,7 +28,7 @@ const getAuth = (): AuthModel | undefined => {
   // porque usamos cookies de sesión
   return {
     api_token: 'session-based',
-    refreshToken: undefined
+    refreshToken: undefined,
   }
 }
 
@@ -35,7 +36,6 @@ const setAuth = (auth: AuthModel) => {
   // if (!localStorage) {
   //   return
   // }
-
   // try {
   //   const lsValue = JSON.stringify(auth)
   //   localStorage.setItem(AUTH_LOCAL_STORAGE_KEY, lsValue)
@@ -59,6 +59,7 @@ const removeAuth = () => {
 export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json'
   axios.defaults.withCredentials = true // IMPORTANTE para enviar cookies
+  axios.interceptors.response.use((response: unknown) => response, handleAuthError)
   axios.interceptors.request.use(
     (config: any) => {
       // const auth = getAuth()

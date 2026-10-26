@@ -1,12 +1,25 @@
 import {getLocalDate} from 'src/app/hooks/useDateFormatter'
-import {getTiposPermiso} from '../core/_requests'
+import {generarReporteGeneralPermiso, getTiposPermiso} from '../core/_requests'
 import {ReportModalForm} from './ReportModalForm'
 import {useFormik} from 'formik'
 import {useQuery} from 'react-query'
-import {API_ROUTES} from 'src/app/config/apiRoutes'
 import {reportValidationSchema} from './schema/reportValidationSchema'
+import {PermisoPDFData} from '../core/_models'
+import {showToast} from 'src/app/utils/toastHelper'
 
-export const ReportModalFormWrapper = ({onClose}) => {
+type Props = {
+  onClose: () => void
+  onPreparePDF: (title?: string) => void
+  onShowPDF: (pdfData: PermisoPDFData) => void
+  onCancelPDF: () => void
+}
+
+export const ReportModalFormWrapper = ({
+  onClose,
+  onPreparePDF,
+  onShowPDF,
+  onCancelPDF,
+}: Props) => {
   const formik = useFormik({
     validationSchema: reportValidationSchema,
     initialValues: {
@@ -15,33 +28,27 @@ export const ReportModalFormWrapper = ({onClose}) => {
       estado: 'TODO',
       tipoPermiso: 'TODO',
     },
-    onSubmit: (values) => {
-      // Crear formulario dinámico
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = API_ROUTES.REPORTES.PERMISO.GENERAL
-      form.target = '_blank' // Muy importante para que se abra en nueva pestaña
+    onSubmit: async (values, helpers) => {
+      try {
+        onClose()
+        onPreparePDF('Reporte de permisos')
+        const pdfData = await generarReporteGeneralPermiso({
+          fechaInicio: formatDate(values.fechaInicio),
+          fechaFin: formatDate(values.fechaFin),
+          estado: values.estado,
+          tipoPermiso: values.tipoPermiso,
+        })
 
-      // Agregar campos como inputs ocultos
-      const addInput = (name: string, value: string) => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = name
-        input.value = value
-        form.appendChild(input)
+        onShowPDF(pdfData)
+      } catch (error: any) {
+        onCancelPDF()
+        showToast({
+          message: error?.message || 'No se pudo generar el reporte. Intente más tarde.',
+          type: 'error',
+        })
+      } finally {
+        helpers.setSubmitting(false)
       }
-
-      addInput('fechaInicio', formatDate(values.fechaInicio))
-      addInput('fechaFin', formatDate(values.fechaFin))
-      addInput('estado', values.estado)
-      addInput('tipoPermiso', values.tipoPermiso)
-      console.log(values.tipoPermiso)
-
-      document.body.appendChild(form)
-      form.submit()
-      document.body.removeChild(form)
-
-      onClose()
     },
   })
 

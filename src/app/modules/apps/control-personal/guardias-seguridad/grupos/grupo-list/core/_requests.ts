@@ -27,7 +27,7 @@ export const createGrupo = (grupo: Grupo): Promise<Grupo | undefined> => {
 }
 
 export const updateGrupo = (grupo: Grupo): Promise<Grupo | undefined> => {
-  return axios.put(`${BASE_URL}/${grupo.id_grupo}`, grupo).then((res) => res.data.data)
+  return axios.put(`${BASE_URL}/${grupo.id_guardia_grupo}`, grupo).then((res) => res.data.data)
 }
 
 export const deleteGrupo = (id: ID): Promise<void> => {
@@ -44,7 +44,7 @@ export const agregarMiembro = (
   idBloque?: number | null
 ): Promise<Grupo | undefined> => {
   return axios
-    .post(`${BASE_URL}/${idGrupo}/miembros`, {id_persona: idPersona, id_bloque: idBloque})
+    .post(`${BASE_URL}/${idGrupo}/miembros`, {id_persona: idPersona, id_guardia_bloque: idBloque})
     .then((res) => res.data.data)
 }
 
@@ -54,7 +54,7 @@ export const actualizarMiembro = (
   idBloque: number | null
 ): Promise<Grupo | undefined> => {
   return axios
-    .put(`${BASE_URL}/${idGrupo}/miembros/${idMiembro}`, {id_bloque: idBloque})
+    .put(`${BASE_URL}/${idGrupo}/miembros/${idMiembro}`, {id_guardia_bloque: idBloque})
     .then((res) => res.data.data)
 }
 

@@ -4,9 +4,8 @@ import {ActionsCell} from './ActionsCell'
 import {CustomHeader} from './CustomHeader'
 import {SelectionCell} from './SelectionCell'
 import {SelectionHeader} from './SelectionHeader'
-import {Comision} from '../../core/_models'
+import {Comision, ComisionPDFData} from '../../core/_models'
 import {DateCell} from './DateCell'
-import {DetallesCell} from './DetallesCell'
 import {EstadoBadge} from '../components/EstadoBadge'
 import HorarioCell from './HorarioCell'
 
@@ -21,6 +20,9 @@ interface ComisionTablePermissions {
   canCreate: boolean
   canManage: boolean
   hasActionPermissions: boolean // Computed property
+  onPreparePDF: (title?: string) => void
+  onShowPDF: (pdfData: ComisionPDFData) => void
+  onCancelPDF: () => void
 }
 
 export const getColumns = (
@@ -53,7 +55,11 @@ export const getColumns = (
           id={props.data[props.row.index].id_comision}
           estado={props.data[props.row.index].estado_boleta_comision}
           hash={props.data[props.row.index].hash}
+          carnet={props.data[props.row.index].ci}
           tipo={props.data[props.row.index].tipo_comision}
+          onPreparePDF={permissions.onPreparePDF}
+          onShowPDF={permissions.onShowPDF}
+          onCancelPDF={permissions.onCancelPDF}
         />
       ),
     },
@@ -70,7 +76,7 @@ export const getColumns = (
     },
     {
       Header: (props) => (
-        <CustomHeader tableProps={props} title='Solicitante' className='min-w-100px' />
+        <CustomHeader tableProps={props} title='Solicitante' className='min-w-150px' />
       ),
       accessor: 'nombre_generador',
     },
@@ -95,13 +101,6 @@ export const getColumns = (
       Header: (props) => <CustomHeader tableProps={props} title='Estado' className='min-w-100px' />,
       accessor: 'estado_boleta_comision',
       Cell: ({value}) => <EstadoBadge estado={value} />,
-    },
-    {
-      Header: (props) => (
-        <CustomHeader tableProps={props} title='Detalles' className='min-w-250px' />
-      ),
-      id: 'detalles',
-      Cell: ({row}) => <DetallesCell comision={row.original} />,
     }
   )
 

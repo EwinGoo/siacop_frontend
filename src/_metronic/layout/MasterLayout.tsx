@@ -5,10 +5,13 @@ import {ScrollTop} from './components/scroll-top'
 import {Content} from './components/content'
 import {FooterWrapper} from './components/footer'
 import {Sidebar} from './components/sidebar'
-import {ActivityDrawer, DrawerMessenger, InviteUsers, UpgradePlan} from '../partials'
 import {PageDataProvider} from './core'
 import {reInitMenu} from '../helpers'
 import {ToolbarWrapper} from './components/toolbar'
+import {ActivityDrawer} from '../partials/layout/activity-drawer/ActivityDrawer'
+import {DrawerMessenger} from '../partials/layout/drawer-messenger/DrawerMessenger'
+import {InviteUsers} from '../partials/modals/invite-users/InviteUsers'
+import {UpgradePlan} from '../partials/modals/upgrade-plan/UpgradePlan'
 
 const MasterLayout = () => {
   const location = useLocation()

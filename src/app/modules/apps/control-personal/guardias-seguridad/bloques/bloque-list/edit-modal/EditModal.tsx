@@ -7,6 +7,7 @@ import {useQueryResponse} from '../core/QueryResponseProvider'
 import {createBloque, updateBloque, getBloqueById} from '../core/_requests'
 import {Bloque, initialBloque} from '../core/_models'
 import {KTIcon} from '../../../../../../../../_metronic/helpers'
+import {GuardiaModalShell} from '../../../grupos/grupo-list/components/GuardiaModalShell'
 
 const schema = Yup.object({
   nombre: Yup.string().min(2, 'Mínimo 2 caracteres').max(100, 'Máximo 100 caracteres').required('El nombre es obligatorio'),
@@ -17,15 +18,18 @@ const EditModal = () => {
   const {itemIdForUpdate, setItemIdForUpdate} = useListView()
   const {refetch} = useQueryResponse()
   const [loading, setLoading] = useState(false)
+  const [loadingBloque, setLoadingBloque] = useState(false)
   const [bloque, setBloque] = useState<Bloque>(initialBloque)
 
   useEffect(() => {
     if (itemIdForUpdate && itemIdForUpdate !== null) {
+      setLoadingBloque(true)
       getBloqueById(itemIdForUpdate).then((data) => {
         if (data) setBloque(data)
-      })
+      }).finally(() => setLoadingBloque(false))
     } else {
       setBloque(initialBloque)
+      setLoadingBloque(false)
     }
   }, [itemIdForUpdate])
 
@@ -36,14 +40,14 @@ const EditModal = () => {
     onSubmit: async (values) => {
       setLoading(true)
       try {
-        if (values.id_bloque) {
+        if (values.id_guardia_bloque) {
           await updateBloque(values)
         } else {
           await createBloque(values)
         }
         await Swal.fire({
           icon: 'success',
-          title: values.id_bloque ? 'Bloque actualizado' : 'Bloque creado',
+          title: values.id_guardia_bloque ? 'Bloque actualizado' : 'Bloque creado',
           timer: 1500,
           showConfirmButton: false,
         })
@@ -58,23 +62,30 @@ const EditModal = () => {
   })
 
   return (
-    <>
-      <div className='modal fade show d-block' tabIndex={-1} role='dialog'>
-        <div className='modal-dialog modal-dialog-centered mw-500px'>
-          <div className='modal-content'>
-            <div className='modal-header bg-primary'>
-              <h2 className='fw-bolder text-white'>
-                {bloque.id_bloque ? 'Editar Bloque' : 'Nuevo Bloque'}
-              </h2>
-              <button
-                className='btn btn-icon btn-sm btn-light-danger ms-2'
-                onClick={() => setItemIdForUpdate(undefined)}
-              >
-                <KTIcon iconName='cross' className='fs-1' />
-              </button>
-            </div>
-            <div className='modal-body scroll-y mx-5 mx-xl-15 my-7'>
-              <form onSubmit={formik.handleSubmit} noValidate>
+    <GuardiaModalShell
+      title={bloque.id_guardia_bloque ? 'Editar bloque o área' : 'Nuevo bloque o área'}
+      subtitle='Define las áreas o bloques usados en las asignaciones de guardias.'
+      headerIcon={<KTIcon iconName='geolocation' className='fs-1 guardia-modal-icon' />}
+      variant='bloque'
+      headerStyle={{background: 'linear-gradient(135deg, #12b886 0%, #0ca678 100%)'}}
+      titleClassName='text-white'
+      subtitleClassName='text-white opacity-75 fs-7'
+      closeButtonClassName='btn-light-success'
+      closeIconClassName='text-success'
+      iconBoxStyle={{
+        background: 'rgba(255, 255, 255, 0.16)',
+        border: '1px solid rgba(255, 255, 255, 0.24)',
+      }}
+      onClose={() => setItemIdForUpdate(undefined)}
+      size='md'
+    >
+      {loadingBloque ? (
+        <div className='d-flex flex-column align-items-center justify-content-center py-15'>
+          <span className='spinner-border text-primary mb-4'></span>
+          <span className='text-muted fw-semibold'>Cargando datos del bloque...</span>
+        </div>
+      ) : (
+        <form onSubmit={formik.handleSubmit} noValidate>
                 {/* Nombre */}
                 <div className='fv-row mb-7'>
                   <label className='required fw-bold fs-6 mb-2'>Nombre del Bloque</label>
@@ -110,24 +121,26 @@ const EditModal = () => {
                     className='btn btn-light me-3'
                     onClick={() => setItemIdForUpdate(undefined)}
                   >
+                    <KTIcon iconName='cross' className='fs-4 me-1' />
                     Cancelar
                   </button>
-                  <button type='submit' className='btn btn-primary' disabled={loading || !formik.isValid}>
+                  <button type='submit' className='btn btn-primary' disabled={loading}>
                     {loading ? (
                       <span className='indicator-progress' style={{display: 'block'}}>
                         Guardando...
                         <span className='spinner-border spinner-border-sm align-middle ms-2'></span>
                       </span>
-                    ) : 'Guardar'}
+                    ) : (
+                      <>
+                        <KTIcon iconName='check' className='fs-4 me-1' />
+                        Guardar
+                      </>
+                    )}
                   </button>
                 </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className='modal-backdrop fade show'></div>
-    </>
+        </form>
+      )}
+    </GuardiaModalShell>
   )
 }
 

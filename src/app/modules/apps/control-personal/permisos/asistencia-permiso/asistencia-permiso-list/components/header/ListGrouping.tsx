@@ -24,7 +24,7 @@ const ListGrouping = () => {
       onSuccess: async (res) => {
         try {
           await queryClient.invalidateQueries(`${QUERIES.ASISTENCIAS_PERMISO_LIST}-${query}`)
-          toast.success(`${selected.length} comisiones aprobadas correctamente`)
+          toast.success(`${selected.length} permisos aprobados correctamente`)
           clearSelected()
           updateState({filter: undefined, ...initialQueryState})
         } catch (error) {

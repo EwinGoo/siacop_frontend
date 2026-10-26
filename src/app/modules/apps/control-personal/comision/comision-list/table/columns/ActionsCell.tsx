@@ -1,29 +1,52 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import {FC, useEffect} from 'react'
+import {FC, useEffect, useState} from 'react'
 import {useMutation, useQueryClient} from 'react-query'
 import {MenuComponent} from 'src/_metronic/assets/ts/components'
 import {ID, KTIcon, QUERIES} from 'src/_metronic/helpers'
 import {useListView} from '../../core/ListViewProvider'
 import {useQueryResponse} from '../../core/QueryResponseProvider'
-import {COMISION_URL, deleteComision, procesarEstadoComision} from '../../core/_requests'
+import {
+  deleteComision,
+  imprimirComisionFormulario,
+  procesarEstadoComision,
+} from '../../core/_requests'
 import {toast} from 'react-toastify'
 import {showToast} from 'src/app/utils/toastHelper'
 import {showConfirmDialog} from 'src/app/utils/swalHelpers.ts'
 import {getPermisosComision} from 'src/app/modules/auth/core/permissions'
-import {API_ROUTES} from 'src/app/config/apiRoutes'
-import {usePermissions} from 'src/app/modules/auth/hooks/usePermissions'
 import {useAuth} from 'src/app/modules/auth'
 import {canManageComisiones} from 'src/app/modules/auth/core/roles/roleDefinitions'
+import {ComisionPDFData} from '../../core/_models'
 
 type Props = {
   id: ID
   estado?: 'GENERADO' | 'ENVIADO' | 'RECEPCIONADO' | 'APROBADO' | 'OBSERVADO' // Add estado prop for comision-specific actions
   hash?: string
+  carnet?: string | null
   tipo?: string
+  buttonLabel?: string
+  buttonClassName?: string
+  inlinePrimaryActions?: boolean
+  onPreparePDF: (title?: string) => void
+  onShowPDF: (pdfData: ComisionPDFData) => void
+  onCancelPDF: () => void
 }
 
-const ActionsCell: FC<Props> = ({id, estado, hash, tipo}) => {
+const ActionsCell: FC<Props> = ({
+  id,
+  estado,
+  hash,
+  carnet,
+  tipo,
+  buttonLabel = 'Acciones',
+  buttonClassName = 'btn btn-outline btn-outline-primary btn-sm',
+  inlinePrimaryActions = false,
+  onPreparePDF,
+  onShowPDF,
+  onCancelPDF,
+}) => {
   const {setAccion, setItemIdForUpdate, setIsShow} = useListView()
+  const [isPrinting, setIsPrinting] = useState(false)
   const {currentUser} = useAuth()
   const canManage = currentUser?.groups ? canManageComisiones(currentUser.groups) : false
   // const canManageUsers = permissions.canManage // Para mostrar campo de solicitante
@@ -51,6 +74,12 @@ const ActionsCell: FC<Props> = ({id, estado, hash, tipo}) => {
   const openObsertacionModal = async () => {
     setItemIdForUpdate(id)
     setAccion('observar')
+    setIsShow(true)
+  }
+
+  const openViewModal = async () => {
+    setItemIdForUpdate(id)
+    setAccion('ver')
     setIsShow(true)
   }
 
@@ -104,9 +133,20 @@ const ActionsCell: FC<Props> = ({id, estado, hash, tipo}) => {
     },
   })
   const handlePrintConfirm = async () => {
+    let didOpenPdf = false
+
     try {
+      if (!hash) {
+        showToast({message: 'No se encontró el código del reporte', type: 'error'})
+        return
+      }
+
       if (estado !== 'GENERADO') {
-        window.open(API_ROUTES.REPORTES.PERSONAL.FORMULARIO(hash!), '_blank')
+        setIsPrinting(true)
+        onPreparePDF(tipo === 'CAJA SALUD' ? 'Boleta de permiso' : 'Boleta de comisión')
+        const pdfData = await imprimirComisionFormulario(hash, carnet)
+        didOpenPdf = true
+        onShowPDF(pdfData)
         return
       }
 
@@ -121,11 +161,23 @@ const ActionsCell: FC<Props> = ({id, estado, hash, tipo}) => {
       })
 
       if (result.isConfirmed) {
+        setIsPrinting(true)
+        onPreparePDF(tipo === 'CAJA SALUD' ? 'Boleta de permiso' : 'Boleta de comisión')
         await sendItem.mutateAsync()
-        window.open(API_ROUTES.REPORTES.PERSONAL.FORMULARIO(hash!), '_blank')
+        const pdfData = await imprimirComisionFormulario(hash, carnet)
+        didOpenPdf = true
+        onShowPDF(pdfData)
       }
-    } catch (error) {
-      showToast({message: 'Error al procesar la impresión', type: 'error'})
+    } catch (error: any) {
+      if (!didOpenPdf) {
+        onCancelPDF()
+      }
+      showToast({
+        message: error?.message || 'Datos personales no disponibles. Intente más tarde.',
+        type: 'error',
+      })
+    } finally {
+      setIsPrinting(false)
     }
   }
 
@@ -177,16 +229,70 @@ const ActionsCell: FC<Props> = ({id, estado, hash, tipo}) => {
     }
   }
 
+  const viewAction = !inlinePrimaryActions ? (
+    <div className='menu-item px-3'>
+      <a href='#' className='menu-link px-3' onClick={openViewModal}>
+        <i className='las la-eye fs-5 me-2'></i> Ver datos
+      </a>
+    </div>
+  ) : null
+
+  const printAction = !inlinePrimaryActions ? (
+    <div className='menu-item px-3'>
+      <a href='#' className='menu-link px-3' onClick={handlePrintConfirm}>
+        {isPrinting ? (
+          <>
+            <span className='spinner-border spinner-border-sm me-2' role='status'></span>
+            Generando...
+          </>
+        ) : (
+          <>
+            <i className='las la-print fs-5 me-2'></i> Imprimir
+          </>
+        )}
+      </a>
+    </div>
+  ) : null
+
   return (
     <>
+      {inlinePrimaryActions ? (
+        <>
+          <button
+            type='button'
+            className='btn btn-light-primary btn-sm flex-fill'
+            onClick={openViewModal}
+          >
+            <i className='las la-eye fs-4 me-1'></i>
+            Ver datos
+          </button>
+          <button
+            type='button'
+            className='btn btn-light-success btn-sm flex-fill'
+            onClick={handlePrintConfirm}
+          >
+            {isPrinting ? (
+              <>
+                <span className='spinner-border spinner-border-sm me-1' role='status'></span>
+                Generando...
+              </>
+            ) : (
+              <>
+                <i className='las la-print fs-4 me-1'></i>
+                Imprimir
+              </>
+            )}
+          </button>
+        </>
+      ) : null}
+
       <a
         href='#'
-        // className='btn btn-light btn-active-light-primary btn-sm'
-        className='btn btn-outline btn-outline-primary btn-sm'
+        className={buttonClassName}
         data-kt-menu-trigger='click'
         data-kt-menu-placement='bottom-end'
       >
-        Acciones
+        {buttonLabel}
         <KTIcon iconName='down' className='fs-5 m-0' />
       </a>
       {/* begin::Menu */}
@@ -195,11 +301,9 @@ const ActionsCell: FC<Props> = ({id, estado, hash, tipo}) => {
         data-kt-menu='true'
       >
         {/* Imprimir action */}
-        <div className='menu-item px-3'>
-          <a href='#' className='menu-link px-3' onClick={handlePrintConfirm}>
-            <i className='las la-print fs-5 me-2'></i> Imprimir
-          </a>
-        </div>
+        {viewAction}
+
+        {printAction}
 
         {/* Edit action */}
         {permisos.puedeEditar && (

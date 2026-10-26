@@ -1,8 +1,8 @@
 {
-  "name": "demo1",
-  "version": "8.2.0",
+  "name": "siacop-frontend",
+  "version": "3.0.0",
   "private": true,
-  "homepage": "/client",
+  "homepage": "/siacop-v3",
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^42.0.0",
     "@ckeditor/ckeditor5-react": "^11.0.0",
@@ -13,6 +13,7 @@
     "@fortawesome/fontawesome-free": "6.1.1",
     "@mui/material": "^7.0.0",
     "@popperjs/core": "^2.11.6",
+    "@sentry/react": "^10.76.2",
     "@types/yup": "^0.32.0",
     "animate.css": "4.1.1",
     "apexcharts": "3.35.0",
@@ -59,6 +60,7 @@
     "@types/bootstrap": "5.1.10",
     "@types/chart.js": "2.9.37",
     "@types/jest": "29.5.2",
+    "@types/node": "^25.9.1",
     "@types/prismjs": "1.26.0",
     "@types/qs": "6.9.7",
     "@types/react": "18.0.6",
@@ -81,6 +83,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:local": "node scripts/build-local.cjs",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "prettier --check .",

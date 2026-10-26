@@ -1,11 +1,11 @@
 import axios from 'axios'
 import {AuthModel, UserModel, UserCheckRequest} from './_models'
 
-const API_URL = process.env.REACT_APP_API_URL
+import {API_BASE_URL as API_URL} from '../../../config/apiRoutes'
 
-export const GET_USER_BY_SESSION_URL = `${API_URL}/api/auth/check`
-export const GET_USER_BY_ACCESSTOKEN_URL = `${API_URL}/verify_token`
-export const LOGIN_URL = `${API_URL}/login`
+export const GET_USER_BY_SESSION_URL = `${API_URL}/auth/check`
+export const GET_USER_BY_ACCESSTOKEN_URL = `${API_URL}/auth/token`
+export const LOGIN_URL = `/login`
 export const REGISTER_URL = `${API_URL}/register`
 export const REQUEST_PASSWORD_URL = `${API_URL}/forgot_password`
 
@@ -52,5 +52,7 @@ export function getUserByToken(token: string) {
 }
 
 export function getUserBySession() {
-  return axios.get<UserCheckRequest>(GET_USER_BY_SESSION_URL)
+  return axios.get<UserCheckRequest>(GET_USER_BY_SESSION_URL, {
+    timeout: 15000,
+  })
 }

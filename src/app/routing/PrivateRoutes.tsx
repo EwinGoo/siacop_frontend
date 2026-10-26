@@ -3,103 +3,90 @@ import {lazy, FC, Suspense} from 'react'
 import {Route, Routes, Navigate} from 'react-router-dom'
 import {MasterLayout} from '../../_metronic/layout/MasterLayout'
 import TopBarProgress from 'react-topbar-progress-indicator'
-import {DashboardWrapper} from '../pages/dashboard/DashboardWrapper'
-import {MenuTestPage} from '../pages/MenuTestPage'
 import {getCSSVariableValue} from '../../_metronic/assets/ts/_utils'
 import {WithChildren} from '../../_metronic/helpers'
-import BuilderPageWrapper from '../pages/layout-builder/BuilderPageWrapper'
 import {ProtectedRoute} from '../modules/auth/core/ProtectedRoute'
 import AccessDeniedPage from '../pages/AccessDeniedPage'
-import {GestionQrPage} from '../modules/apps/control-personal/gestion-qr'
-import { PERMISSIONS } from '../modules/auth/core/roles/permissions'
+import {PERMISSIONS} from '../modules/auth/core/roles/permissions'
+import {GroupRoute} from '../modules/apps/archivo-central/components/GroupRoute'
+import {ListLoading} from '../modules/components/loading/ListLoading'
+
+const ArchivoCentralPage = lazy(() => import('../modules/apps/archivo-central/ArchivoCentralPage'))
 
 const PrivateRoutes = () => {
-  const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
-  const WizardsPage = lazy(() => import('../modules/wizards/WizardsPage'))
-  const AccountPage = lazy(() => import('../modules/accounts/AccountPage'))
-  const WidgetsPage = lazy(() => import('../modules/widgets/WidgetsPage'))
-  const ChatPage = lazy(() => import('../modules/apps/chat/ChatPage'))
-  const UsersPage = lazy(() => import('../modules/apps/user-management/UsersPage'))
-
   const ComisionPage = lazy(() => import('../modules/apps/control-personal/comision/ComisionPage'))
-  const GestionGuardiasPage = lazy(() => import('../modules/apps/control-personal/guardias-seguridad/GestionGuardiasPage'))
-  const AsistenciaPermisoPage = lazy(() => import('../modules/apps/control-personal/permisos/asistencia-permiso/AsistenciaPermisoPage'))
-  const DeclaratoriaComisionPage = lazy(() => import('../modules/apps/control-personal/declaratoria-comision/DeclaratoriaComisionPage'))
-  const TipoPermisoPage = lazy(() => import('../modules/apps/control-personal/permisos/tipos-permisos/TipoPermisoPage'))
-  const FeriadoAsuetoPage = lazy(() => import('../modules/apps/control-personal/feriado-asueto/FeriadoAsuetoPage'))
+  const GestionGuardiasPage = lazy(
+    () => import('../modules/apps/control-personal/guardias-seguridad/GestionGuardiasPage')
+  )
+  const AsistenciaPermisoPage = lazy(
+    () =>
+      import('../modules/apps/control-personal/permisos/asistencia-permiso/AsistenciaPermisoPage')
+  )
+  const DeclaratoriaComisionPage = lazy(
+    () => import('../modules/apps/control-personal/declaratoria-comision/DeclaratoriaComisionPage')
+  )
+  const AsignacionesAdministrativasPage = lazy(
+    () =>
+      import(
+        '../modules/apps/control-personal/asignaciones-administrativas/AsignacionesAdministrativasPage'
+      )
+  )
+  const HorariosPage = lazy(() => import('../modules/apps/control-personal/horarios/HorariosPage'))
+  const TipoPermisoPage = lazy(
+    () => import('../modules/apps/control-personal/permisos/tipos-permisos/TipoPermisoPage')
+  )
+  const FeriadoAsuetoPage = lazy(
+    () => import('../modules/apps/control-personal/feriado-asueto/FeriadoAsuetoPage')
+  )
+  const PlanillaControlPage = lazy(() => import('../modules/apps/planillas/PlanillaControlPage'))
+  const PlanillaAsistenciaPage = lazy(
+    () => import('../modules/apps/control-personal/planilla-asistencia/PlanillaAsistenciaPage')
+  )
+  const MisMarcacionesPage = lazy(
+    () =>
+      import(
+        '../modules/apps/control-personal/planilla-asistencia/mis-marcaciones/MisMarcacionesPage'
+      )
+  )
+  const GestionQrPage = lazy(
+    () => import('../modules/apps/control-personal/gestion-qr/GestionQrPage')
+  )
 
-  const BiometricoPage = lazy(() => import('../modules/apps/administrador/biometrico/BiometricoPage'))
-  const BiometricoAdminPage = lazy(() => import('../modules/apps/administrador/biometrico/admin/BiometricoAdminPage'))
-  const VacacionReportePage = lazy(() => import('../modules/apps/control-personal/vacaciones/reporte/VacacionReportePage'))
-
-  const enviroment = process.env.REACT_APP_ENVIRONMENT || ''
+  const BiometricoPage = lazy(
+    () => import('../modules/apps/administrador/biometrico/BiometricoPage')
+  )
+  const BiometricoAdminPage = lazy(
+    () => import('../modules/apps/administrador/biometrico/admin/BiometricoAdminPage')
+  )
+  const VacacionReportePage = lazy(
+    () => import('../modules/apps/control-personal/vacaciones/reporte/VacacionReportePage')
+  )
 
   return (
     <Routes>
       <Route element={<MasterLayout />}>
-        {/* Redirect to Dashboard after success login/registartion */}
-
-        {enviroment === 'development' && (
-          <>
-            <Route path='auth/*' element={<Navigate to='/dashboard' />} />
-            {/* Pages */}
-            <Route path='dashboard' element={<DashboardWrapper />} />
-            <Route path='builder' element={<BuilderPageWrapper />} />
-            <Route path='menu-test' element={<MenuTestPage />} />
-            {/* Lazy Modules */}
-            <Route
-              path='crafted/pages/profile/*'
-              element={
-                <SuspensedView>
-                  <ProfilePage />
-                </SuspensedView>
-              }
-            />
-            <Route
-              path='crafted/pages/wizards/*'
-              element={
-                <SuspensedView>
-                  <WizardsPage />
-                </SuspensedView>
-              }
-            />
-            <Route
-              path='crafted/widgets/*'
-              element={
-                <SuspensedView>
-                  <WidgetsPage />
-                </SuspensedView>
-              }
-            />
-            <Route
-              path='crafted/account/*'
-              element={
-                <SuspensedView>
-                  <AccountPage />
-                </SuspensedView>
-              }
-            />
-            <Route
-              path='apps/chat/*'
-              element={
-                <SuspensedView>
-                  <ChatPage />
-                </SuspensedView>
-              }
-            />
-            <Route
-              path='apps/user-management/*'
-              element={
-                <SuspensedView>
-                  <UsersPage />
-                </SuspensedView>
-              }
-            />
-          </>
-        )}
-
+        <Route
+          path='apps/auditoria/*'
+          element={
+            <GroupRoute groups={['auditoria', 'operador_archivo', 'administrador']}>
+              <SuspensedView>
+                <ArchivoCentralPage modo='auditoria' />
+              </SuspensedView>
+            </GroupRoute>
+          }
+        />
+        <Route
+          path='apps/archivo-central/*'
+          element={
+            <GroupRoute groups={['operador_archivo', 'administrador']}>
+              <SuspensedView>
+                <ArchivoCentralPage modo='gestion' />
+              </SuspensedView>
+            </GroupRoute>
+          }
+        />
         {/* RUTAS ACTUALIZADAS CON NUEVO SISTEMA DE PERMISOS */}
-        
+
         {/* Feriados y Asuetos - requiere permiso específico */}
         <Route
           path='apps/biometricos/*'
@@ -133,7 +120,7 @@ const PrivateRoutes = () => {
             </SuspensedView>
           }
         />
-        
+
         {/* Asistencias y Permisos - requiere al menos ver */}
         <Route
           path='apps/asistencias-permisos/*'
@@ -145,7 +132,7 @@ const PrivateRoutes = () => {
             </SuspensedView>
           }
         />
-        
+
         {/* Tipos de Permisos */}
         <Route
           path='apps/tipos-permisos/*'
@@ -157,19 +144,22 @@ const PrivateRoutes = () => {
             </SuspensedView>
           }
         />
-        
+
         {/* Comisiones */}
         <Route
           path='apps/comisiones/*'
           element={
             <SuspensedView>
-              <ProtectedRoute requiredSpecificPermissions={[PERMISSIONS.COMISION.VIEW]} excludeDocenteAdministrativo={true}>
+              <ProtectedRoute
+                requiredSpecificPermissions={[PERMISSIONS.COMISION.VIEW]}
+                excludeDocenteAdministrativo={true}
+              >
                 <ComisionPage />
               </ProtectedRoute>
             </SuspensedView>
           }
         />
-        
+
         {/* Gestión QR */}
         <Route
           path='apps/gestion-qr'
@@ -205,20 +195,92 @@ const PrivateRoutes = () => {
             </SuspensedView>
           }
         />
-        
+
+        {['apps/planilla-docente/*', 'apps/planillas-docente/*'].map((path) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <SuspensedView>
+                <ProtectedRoute>
+                  <PlanillaControlPage modulo='docente' />
+                </ProtectedRoute>
+              </SuspensedView>
+            }
+          />
+        ))}
+
+        {['apps/planilla-estudiante/*', 'apps/planillas-estudiante/*'].map((path) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <SuspensedView>
+                <ProtectedRoute>
+                  <PlanillaControlPage modulo='estudiante' />
+                </ProtectedRoute>
+              </SuspensedView>
+            }
+          />
+        ))}
+
         {/* Declaratoria de Comisión - requiere múltiples permisos alternativos */}
         <Route
           path='apps/declaratoria-comision/*'
           element={
             <SuspensedView>
-              <ProtectedRoute 
+              <ProtectedRoute
                 requiredSpecificPermissions={[
                   PERMISSIONS.DECLARATORIA_COMISION.VIEW,
-                  PERMISSIONS.DECLARATORIA_COMISION.CREATE
+                  PERMISSIONS.DECLARATORIA_COMISION.CREATE,
                 ]}
                 requireAllPermissions={false} // OR logic - al menos uno
               >
                 <DeclaratoriaComisionPage />
+              </ProtectedRoute>
+            </SuspensedView>
+          }
+        />
+
+        <Route
+          path='apps/asignaciones-administrativas/*'
+          element={
+            <SuspensedView>
+              <AsignacionesAdministrativasPage />
+            </SuspensedView>
+          }
+        />
+
+        <Route
+          path='apps/horarios/*'
+          element={
+            <SuspensedView>
+              <HorariosPage />
+            </SuspensedView>
+          }
+        />
+
+        <Route
+          path='apps/mis-marcaciones'
+          element={
+            <SuspensedView>
+              <MisMarcacionesPage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='apps/planilla-asistencia/*'
+          element={
+            <SuspensedView>
+              <ProtectedRoute
+                requiredSpecificPermissions={[
+                  PERMISSIONS.PLANILLA_ASISTENCIA.VIEW,
+                  PERMISSIONS.PLANILLA_ASISTENCIA.IMPORT,
+                  PERMISSIONS.PLANILLA_ASISTENCIA.REVIEW,
+                ]}
+                requireAllPermissions={false}
+              >
+                <PlanillaAsistenciaPage />
               </ProtectedRoute>
             </SuspensedView>
           }
@@ -241,7 +303,20 @@ const SuspensedView: FC<WithChildren> = ({children}) => {
     barThickness: 1,
     shadowBlur: 5,
   })
-  return <Suspense fallback={<TopBarProgress />}>{children}</Suspense>
+  return (
+    <Suspense
+      fallback={
+        <>
+          <TopBarProgress />
+          <div className='d-flex flex-column-fluid align-items-center justify-content-center py-20'>
+            <ListLoading message='Cargando contenido...' overlay={false} />
+          </div>
+        </>
+      }
+    >
+      {children}
+    </Suspense>
+  )
 }
 
 export {PrivateRoutes}

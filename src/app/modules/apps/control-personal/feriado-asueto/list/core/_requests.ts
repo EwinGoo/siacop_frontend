@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from 'axios'
 import { ID, Response } from '../../../../../../../_metronic/helpers'
 import { FeriadoAsueto, FeriadoAsuetoQueryResponse, BackendResponse, FeriadoAsuetoBackendData } from './_models'
 import { API_ROUTES } from 'src/app/config/apiRoutes'
+import { ValidationError } from 'src/app/utils/httpErrors'
 
 const FERIADO_ASUETO_URL = API_ROUTES.CONTROL_PERSONAL + '/asistencia-feriado-asueto'
 
@@ -43,18 +44,47 @@ const getFeriadoAsuetoById = (id: ID): Promise<FeriadoAsueto | undefined> => {
     .then((response: Response<FeriadoAsueto>) => response.data)
 }
 
-const createFeriadoAsueto = (feriadoAsueto: FeriadoAsueto): Promise<FeriadoAsueto | undefined> => {
-  return axios
-    .post(FERIADO_ASUETO_URL, feriadoAsueto)
-    .then((response: AxiosResponse<Response<FeriadoAsueto>>) => response.data)
-    .then((response: Response<FeriadoAsueto>) => response.data)
+const createFeriadoAsueto = async (
+  feriadoAsueto: FeriadoAsueto
+): Promise<FeriadoAsueto | undefined> => {
+  try {
+    const response = await axios.post(FERIADO_ASUETO_URL, feriadoAsueto)
+    return response.data.data
+  } catch (error: any) {
+    if (error.response?.status === 422 || error.response?.status === 400) {
+      const validationErrors =
+        error.response.data.validation_errors || error.response.data.data || {}
+
+      throw new ValidationError(
+        validationErrors,
+        error.response.data.message
+      )
+    }
+    throw error
+  }
 }
 
-const updateFeriadoAsueto = (feriadoAsueto: FeriadoAsueto): Promise<FeriadoAsueto | undefined> => {
-  return axios
-    .put(`${FERIADO_ASUETO_URL}/${feriadoAsueto.id_asistencia_feriado_asueto}`, feriadoAsueto)
-    .then((response: AxiosResponse<Response<FeriadoAsueto>>) => response.data)
-    .then((response: Response<FeriadoAsueto>) => response.data)
+const updateFeriadoAsueto = async (
+  feriadoAsueto: FeriadoAsueto
+): Promise<FeriadoAsueto | undefined> => {
+  try {
+    const response = await axios.put(
+      `${FERIADO_ASUETO_URL}/${feriadoAsueto.id_asistencia_feriado_asueto}`,
+      feriadoAsueto
+    )
+    return response.data.data
+  } catch (error: any) {
+    if (error.response?.status === 422 || error.response?.status === 400) {
+      const validationErrors =
+        error.response.data.validation_errors || error.response.data.data || {}
+
+      throw new ValidationError(
+        validationErrors,
+        error.response.data.message
+      )
+    }
+    throw error
+  }
 }
 
 const deleteFeriadoAsueto = (feriadoAsuetoId: ID): Promise<void> => {

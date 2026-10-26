@@ -1,8 +1,8 @@
-import {FC, useState, useCallback, useEffect, useMemo} from 'react'
+import {FC, useState, useMemo} from 'react'
 import clsx from 'clsx'
 import {useFormik} from 'formik'
 import {toast} from 'react-toastify'
-import {ID, isNotEmpty, KTIcon} from 'src/_metronic/helpers'
+import {ID, isNotEmpty} from 'src/_metronic/helpers'
 import {initialComision, Comision} from '../core/_models'
 import {useListView} from '../core/ListViewProvider'
 import {createComision, getPersonaAutocomplete, updateComision} from '../core/_requests'
@@ -15,7 +15,6 @@ import {ListLoading} from 'src/app/modules/components/loading/ListLoading'
 import {FormActions} from 'src/app/modules/components/FormActions'
 import AsyncSelectField from './components/AsyncSelectField'
 import {useApiFieldErrors} from 'src/app/hooks/useApiFieldErrors'
-import {usePermissions} from 'src/app/modules/auth/hooks/usePermissions'
 import {useAuth} from 'src/app/modules/auth'
 import {canManageComisiones} from 'src/app/modules/auth/core/roles/roleDefinitions'
 import {SelectField} from 'src/app/modules/components/SelectField'
@@ -42,9 +41,6 @@ const EditModalForm: FC<Props> = ({
   const {currentUser} = useAuth()
   const canManage = currentUser?.groups ? canManageComisiones(currentUser.groups) : false
 
-  const isCreating = !isNotEmpty(comision.id_comision)
-  const isEditing = isNotEmpty(comision.id_comision)
-
   const [comisionForEdit] = useState<Comision>({
     ...comision,
     id_usuario_generador: comision.id_usuario_generador,
@@ -66,8 +62,6 @@ const EditModalForm: FC<Props> = ({
       return tipoPermiso.nombre
     }
     if (comision.tipo_comision) {
-      console.log(comision.tipo_comision);
-      
       return comision.tipo_comision
     }
     return 'COMISIÓN' // Valor por defecto
@@ -86,7 +80,7 @@ const EditModalForm: FC<Props> = ({
       tipo_comision: tipoActual,
       id_tipo_permiso: tipoPermiso?.id_tipo_permiso || comisionForEdit.id_tipo_permiso,
       fecha_comision_fin:
-        tipoActual == 'FISIOTERAPIA' ? comisionForEdit.fecha_comision_fin : undefined,
+        tipoActual === 'FISIOTERAPIA' ? comisionForEdit.fecha_comision_fin : undefined,
       id_sucursal_caja_salud:
         tipoActual === 'CAJA SALUD' ? comisionForEdit.id_caja_salud_sucursal : null,
     },
@@ -111,7 +105,7 @@ const EditModalForm: FC<Props> = ({
         }
 
         if (isNotEmpty(values.id_comision)) {
-          const res = await updateComision(dataToSend)
+          await updateComision(dataToSend)
           toast.success('Registro actualizado correctamente')
         } else {
           await createComision(dataToSend)
@@ -137,8 +131,16 @@ const EditModalForm: FC<Props> = ({
     return formik.errors[fieldName] || apiErrors[fieldName]
   }
 
+  const shouldShowFieldError = (fieldName: string) => {
+    return Boolean(getFieldError(fieldName)) && (
+      Boolean(formik.touched[fieldName]) ||
+      Boolean(apiErrors[fieldName]) ||
+      formik.submitCount > 0
+    )
+  }
+
   const isFieldValid = (fieldName: string) => {
-    return !(formik.touched[fieldName] && getFieldError(fieldName))
+    return !shouldShowFieldError(fieldName)
   }
 
   interface OptionType {
@@ -212,23 +214,18 @@ const EditModalForm: FC<Props> = ({
   }
 
   const getPlaceholderDesde = () => {
-    if(tipoActual === 'PERSONAL'){
+    if (tipoActual === 'PERSONAL') {
       return 'Ej: Embleatico, Oficina central, etc.'
     }
     return 'Ej: Oficina central, Hospital, etc.'
   }
+
   const getPlaceholderHacia = () => {
-    if(tipoActual === 'PERSONAL'){
+    if (tipoActual === 'PERSONAL') {
       return 'Ej: Polideportivo, Postgrado, etc.'
     }
     return 'Ej: Viacha, Kallutaca, etc.'
   }
-
-   useEffect(()=>{
-      console.log(formik.errors);
-      console.log(formik.values);
-  
-    },[formik.errors, formik.values])
 
   return (
     <>

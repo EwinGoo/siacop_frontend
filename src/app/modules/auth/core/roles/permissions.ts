@@ -38,6 +38,13 @@ export const PERMISSIONS = {
     VIEW:   'guardia_seguridad.view',
     MANAGE: 'guardia_seguridad.manage',
   },
+  PLANILLA_ASISTENCIA: {
+    VIEW: 'planilla_asistencia.view',
+    IMPORT: 'planilla_asistencia.import',
+    CREATE_PROCESS: 'planilla_asistencia.create_process',
+    EXECUTE_PROCESS: 'planilla_asistencia.execute_process',
+    REVIEW: 'planilla_asistencia.review',
+  },
 } as const
 
 export type Permission =
@@ -49,3 +56,4 @@ export type Permission =
   | typeof PERMISSIONS.GESTION_QR[keyof typeof PERMISSIONS.GESTION_QR]
   | typeof PERMISSIONS.VACACION[keyof typeof PERMISSIONS.VACACION]
   | typeof PERMISSIONS.GUARDIA_SEGURIDAD[keyof typeof PERMISSIONS.GUARDIA_SEGURIDAD]
+  | typeof PERMISSIONS.PLANILLA_ASISTENCIA[keyof typeof PERMISSIONS.PLANILLA_ASISTENCIA]

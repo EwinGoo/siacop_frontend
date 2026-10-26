@@ -2,7 +2,7 @@ import Flatpickr from 'react-flatpickr'
 import {Spanish} from 'flatpickr/dist/l10n/es'
 import clsx from 'clsx'
 import {formatDate} from 'date-fns'
-import { useEffectiveTheme } from 'src/app/hooks/useEffectiveTheme'
+import {useEffectiveTheme} from 'src/app/hooks/useEffectiveTheme'
 
 export const DatePickerField = ({field, form, isFieldValid, onChange, isSubmitting, onBlur}) => {
   const {isDark} = useEffectiveTheme()
@@ -27,8 +27,11 @@ export const DatePickerField = ({field, form, isFieldValid, onChange, isSubmitti
         // onChange={([date]) => onChange(date)}
         options={{
           dateFormat: 'Y-m-d',
+          altInput: true,
+          altFormat: 'd-m-Y',
           locale: Spanish,
           monthSelectorType: 'static',
+          allowInput: true,
           onOpen: () => {
             if (isDark) {
               setTimeout(() => {

@@ -31,6 +31,12 @@ export type AsistenciaPermiso = {
   nombre_cargo?: string
 }
 
+export type PermisoPDFData = {
+  blob: Blob
+  filename: string
+  title?: string
+}
+
 // Tipo para el archivo multimedia
 export type MultimediaFile = {
   id_multimedia: number
@@ -164,8 +170,8 @@ export type ListViewContextProps = {
   disabled: boolean
   isShow: boolean // Tipo explícito para isShow
   setIsShow: Dispatch<SetStateAction<boolean>> // Make sure this is included
-  accion?: 'editar' | 'aprobar' | 'observar' | 'report'
-  setAccion: Dispatch<SetStateAction<'editar' | 'aprobar' | 'observar' | 'report' | undefined>>
+  accion?: 'editar' | 'aprobar' | 'observar' | 'report' | 'ver'
+  setAccion: Dispatch<SetStateAction<'editar' | 'aprobar' | 'observar' | 'report' | 'ver' | undefined>>
 }
 
 export const initialListView: ListViewContextProps = {

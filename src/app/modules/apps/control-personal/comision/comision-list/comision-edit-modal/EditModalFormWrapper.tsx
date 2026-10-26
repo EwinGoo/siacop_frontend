@@ -2,7 +2,7 @@ import {useQuery} from 'react-query'
 import {EditModalForm} from './EditModalForm'
 import {isNotEmpty, QUERIES} from '../../../../../../../_metronic/helpers'
 import {useListView} from '../core/ListViewProvider'
-import {getComisionById, getTiposPermiso, getCajaSaludSucursales} from '../core/_requests'
+import {getComisionById, getCajaSaludSucursales} from '../core/_requests'
 import Spinner from 'react-bootstrap/Spinner'
 import {toast} from 'react-toastify'
 import {initialComision} from '../core/_models'
@@ -25,13 +25,13 @@ const EditModalFormWrapper = ({onClose, initialType, setSelectedType, tiposPermi
 
   // Query para sucursales de caja de salud - solo se ejecuta cuando es necesario
   const esTipoCajaSalud = useMemo(() => {
-    if (itemIdForUpdate && tiposPermiso) {
-      // En modo edición, verificar el tipo de la comisión cargada
-      return false // Se determinará cuando se cargue la comisión
-    }
     // En modo creación, verificar el tipo inicial
-    return initialType?.id_tipo_permiso === '9' || initialType?.tipoPermiso === 'CAJA SALUD' || initialType?.tipoPermiso === 'FISIOTERAPIA'
-  }, [itemIdForUpdate, initialType, tiposPermiso])
+    return (
+      initialType?.id_tipo_permiso === '9' ||
+      initialType?.tipoPermiso === 'CAJA SALUD' ||
+      initialType?.tipoPermiso === 'FISIOTERAPIA'
+    )
+  }, [initialType])
 
   const {data: cajaSaludSucursales} = useQuery('caja-salud-sucursales', getCajaSaludSucursales, {
     staleTime: 1000 * 60 * 5, // 5 minutos de cache
@@ -81,13 +81,6 @@ const EditModalFormWrapper = ({onClose, initialType, setSelectedType, tiposPermi
   }
 
   // Determinar si es tipo caja salud en modo edición
-  const esComisionCajaSalud = useMemo(() => {
-    if (comision?.id_tipo_permiso) {
-      return comision.id_tipo_permiso.toString() === '9'
-    }
-    return esTipoCajaSalud
-  }, [comision, esTipoCajaSalud])
-
   // Query adicional para sucursales si se detecta que es caja salud en edición
   // const {data: cajaSaludSucursalesEdit} = useQuery(
   //   'caja-salud-sucursales-edit',

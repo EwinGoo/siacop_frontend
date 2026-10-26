@@ -104,7 +104,7 @@ const LayoutProvider: FC<WithChildren> = ({children}) => {
   return <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>
 }
 
-export {LayoutContext, LayoutProvider}
+export {LayoutContext, LayoutProvider, enableSplashScreen, disableSplashScreen}
 
 export function useLayout() {
   return useContext(LayoutContext)

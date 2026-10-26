@@ -15,6 +15,7 @@ import {useApiFieldErrors} from 'src/app/hooks/useApiFieldErrors'
 import {FormActions} from 'src/app/modules/components/FormActions'
 import {feriadoAsuetoSchema} from '../../schemas/feriadoAsuetoSchema'
 import {ListLoading} from 'src/app/modules/components/loading/ListLoading'
+import {ValidationError} from 'src/app/utils/httpErrors'
 
 type Props = {
   isFeriadoAsuetoLoading: boolean
@@ -81,12 +82,12 @@ const EditModalForm: FC<Props> = ({feriadoAsueto, isFeriadoAsuetoLoading, onClos
         onClose()
       } catch (error: any) {
         console.error(error)
-        if (error.response?.status === 422 && error.response.data?.validation_errors) {
-          setApiErrors(error.response.data.validation_errors)
+        if (error instanceof ValidationError) {
+          setApiErrors(error.validationErrors)
           await Swal.fire({
             icon: 'error',
             title: 'Error de validación',
-            html: Object.entries(error.response.data.validation_errors)
+            html: Object.entries(error.validationErrors)
               .map(([field, message]) => `<li>${message}</li>`)
               .join(''),
           })
@@ -103,8 +104,16 @@ const EditModalForm: FC<Props> = ({feriadoAsueto, isFeriadoAsuetoLoading, onClos
     },
   })
 
+  const shouldShowFieldError = (fieldName: string) => {
+    return Boolean(getFieldError(formik.errors, fieldName)) && (
+      Boolean(formik.touched[fieldName]) ||
+      Boolean(apiErrors[fieldName]) ||
+      formik.submitCount > 0
+    )
+  }
+
   const isFieldValid = (fieldName: string) => {
-    return !(formik.touched[fieldName] && getFieldError(formik.errors, fieldName))
+    return !shouldShowFieldError(fieldName)
   }
 
   useEffect(() => {

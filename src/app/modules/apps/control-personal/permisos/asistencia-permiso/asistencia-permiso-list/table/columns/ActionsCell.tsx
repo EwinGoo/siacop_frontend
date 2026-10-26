@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import {FC, useEffect} from 'react'
+import {FC, useEffect, useState} from 'react'
 import {useMutation, useQueryClient} from 'react-query'
 import {MenuComponent} from 'src/_metronic/assets/ts/components'
 import {ID, KTIcon, QUERIES} from 'src/_metronic/helpers'
@@ -7,6 +7,7 @@ import {useListView} from '../../core/ListViewProvider'
 import {useQueryResponse} from '../../core/QueryResponseProvider'
 import {
   deleteAsistenciaPermiso,
+  imprimirPermisoFormulario,
   procesarEstadoPermiso,
 } from '../../core/_requests'
 import {toast} from 'react-toastify'
@@ -14,18 +15,37 @@ import {showToast} from 'src/app/utils/toastHelper'
 import {showConfirmDialog} from 'src/app/utils/swalHelpers.ts'
 import {getPermisosComision} from 'src/app/modules/auth/core/permissions'
 import {EstadoType} from '../../core/_models'
-import {API_ROUTES} from 'src/app/config/apiRoutes'
 import {useAuth} from 'src/app/modules/auth'
 import {canManageComisiones} from 'src/app/modules/auth/core/roles/roleDefinitions'
+import {PermisoPDFData} from '../../core/_models'
 
 type Props = {
   id: ID
   estado: EstadoType
   hash?: string
+  carnet?: string | null
+  buttonLabel?: string
+  buttonClassName?: string
+  inlinePrimaryActions?: boolean
+  onPreparePDF: (title?: string) => void
+  onShowPDF: (pdfData: PermisoPDFData) => void
+  onCancelPDF: () => void
 }
 
-const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
+const ActionsCell: FC<Props> = ({
+  id,
+  estado,
+  hash = null,
+  carnet,
+  buttonLabel = 'Acciones',
+  buttonClassName = 'btn btn-outline btn-outline-primary btn-sm',
+  inlinePrimaryActions = false,
+  onPreparePDF,
+  onShowPDF,
+  onCancelPDF,
+}) => {
   const {setAccion, setItemIdForUpdate, setIsShow} = useListView()
+  const [isPrinting, setIsPrinting] = useState(false)
   const queryClient = useQueryClient()
   const {query} = useQueryResponse()
   const {currentUser} = useAuth()
@@ -50,6 +70,12 @@ const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
   const openObsertacionModal = async () => {
     setItemIdForUpdate(id)
     setAccion('observar')
+    setIsShow(true)
+  }
+
+  const openViewModal = async () => {
+    setItemIdForUpdate(id)
+    setAccion('ver')
     setIsShow(true)
   }
 
@@ -83,7 +109,7 @@ const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
     },
     onError: (error: any) => {
       showToast({
-        message: error.response?.data?.message || 'Error al eliminar la permiso',
+        message: error.response?.data?.message || 'Error al eliminar el permiso',
         type: 'error',
       })
     },
@@ -92,16 +118,27 @@ const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
   const sendItem = useMutation(() => procesarEstadoPermiso({code: id, action: 'send'}), {
     onSuccess: () => {
       queryClient.invalidateQueries([`${QUERIES.ASISTENCIAS_PERMISO_LIST}-${query}`])
-      showToast({message: 'Permiso enviada correctamente', type: 'success'})
+      showToast({message: 'Permiso enviado correctamente', type: 'success'})
     },
     onError: () => {
-      showToast({message: 'Error al enviar la permiso', type: 'error'})
+      showToast({message: 'Error al enviar el permiso', type: 'error'})
     },
   })
   const handlePrintConfirm = async () => {
+    let didOpenPdf = false
+
     try {
+      if (!hash) {
+        showToast({message: 'No se encontró el código del reporte', type: 'error'})
+        return
+      }
+
       if (estado !== 'GENERADO') {
-        window.open(API_ROUTES.REPORTES.PERMISO.FORMULARIO(hash!), '_blank')
+        setIsPrinting(true)
+        onPreparePDF('Boleta de permiso')
+        const pdfData = await imprimirPermisoFormulario(hash, carnet)
+        didOpenPdf = true
+        onShowPDF(pdfData)
         return
       }
 
@@ -114,11 +151,23 @@ const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
       })
 
       if (result.isConfirmed) {
+        setIsPrinting(true)
+        onPreparePDF('Boleta de permiso')
         await sendItem.mutateAsync()
-        window.open(API_ROUTES.REPORTES.PERMISO.FORMULARIO(hash!), '_blank')
+        const pdfData = await imprimirPermisoFormulario(hash, carnet)
+        didOpenPdf = true
+        onShowPDF(pdfData)
       }
-    } catch (error) {
-      showToast({message: 'Error al procesar la impresión', type: 'error'})
+    } catch (error: any) {
+      if (!didOpenPdf) {
+        onCancelPDF()
+      }
+      showToast({
+        message: error?.message || 'Datos personales no disponibles. Intente más tarde.',
+        type: 'error',
+      })
+    } finally {
+      setIsPrinting(false)
     }
   }
 
@@ -142,7 +191,7 @@ const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
   const handleApprove = async () => {
     try {
       const result = await showConfirmDialog({
-        title: '¿Aprobar comisión?',
+        title: '¿Aprobar permiso?',
         html: 'Esta acción cambiará el estado a <span class="badge badge-light-success">APROBADO</span>',
         icon: 'question',
         confirmButtonText: 'Sí, aprobar',
@@ -156,7 +205,7 @@ const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
   const handleReceive = async () => {
     try {
       const result = await showConfirmDialog({
-        title: '¿Recepcionar comisión?',
+        title: '¿Recepcionar permiso?',
         html: 'Esta acción cambiará el estado a <span class="badge badge-light-info">RECEPCIONADO</span>',
         icon: 'question',
         confirmButtonText: 'Sí, continuar',
@@ -166,19 +215,74 @@ const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
         await receiveItem.mutateAsync()
       }
     } catch (error) {
-      toast.error('Error al aprobar la permiso')
+      toast.error('Error al recepcionar el permiso')
     }
   }
 
+  const viewAction = !inlinePrimaryActions ? (
+    <div className='menu-item px-3'>
+      <a href='#' className='menu-link px-3' onClick={openViewModal}>
+        <i className='las la-eye fs-5 me-2'></i> Ver datos
+      </a>
+    </div>
+  ) : null
+
+  const printAction = !inlinePrimaryActions ? (
+    <div className='menu-item px-3'>
+      <a href='#' className='menu-link px-3' onClick={handlePrintConfirm}>
+        {isPrinting ? (
+          <>
+            <span className='spinner-border spinner-border-sm me-2' role='status'></span>
+            Generando...
+          </>
+        ) : (
+          <>
+            <i className='las la-print fs-5 me-2'></i> Imprimir
+          </>
+        )}
+      </a>
+    </div>
+  ) : null
+
   return (
     <>
+      {inlinePrimaryActions ? (
+        <>
+          <button
+            type='button'
+            className='btn btn-light-primary btn-sm flex-fill'
+            onClick={openViewModal}
+          >
+            <i className='las la-eye fs-4 me-1'></i>
+            Ver datos
+          </button>
+          <button
+            type='button'
+            className='btn btn-light-success btn-sm flex-fill'
+            onClick={handlePrintConfirm}
+          >
+            {isPrinting ? (
+              <>
+                <span className='spinner-border spinner-border-sm me-1' role='status'></span>
+                Generando...
+              </>
+            ) : (
+              <>
+                <i className='las la-print fs-4 me-1'></i>
+                Imprimir
+              </>
+            )}
+          </button>
+        </>
+      ) : null}
+
       <a
         href='#'
-        className='btn btn-outline btn-outline-primary  btn-sm'
+        className={buttonClassName}
         data-kt-menu-trigger='click'
         data-kt-menu-placement='bottom-end'
       >
-        Acciones
+        {buttonLabel}
         <KTIcon iconName='down' className='fs-5 m-0' />
       </a>
       {/* begin::Menu */}
@@ -186,12 +290,9 @@ const ActionsCell: FC<Props> = ({id, estado, hash = null}) => {
         className='menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-150px py-4'
         data-kt-menu='true'
       >
-        {/* Imprimir action */}
-        <div className='menu-item px-3'>
-          <a href='#' className='menu-link px-3' onClick={handlePrintConfirm}>
-            <i className='las la-print fs-5 me-2'></i> Imprimir
-          </a>
-        </div>
+        {viewAction}
+
+        {printAction}
 
         {/* Edit action */}
         {permisos.puedeEditar && (

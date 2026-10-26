@@ -25,6 +25,9 @@ export const showAxiosError = (
   } else if (response?.data?.errors && typeof response.data.errors === 'object') {
     const details = Object.values(response.data.errors).join('\n')
     message += details
+  } else if (response?.data?.data && typeof response.data.data === 'object') {
+    const details = Object.values(response.data.data).join('\n')
+    message += details
   }
 
   if (!message) {

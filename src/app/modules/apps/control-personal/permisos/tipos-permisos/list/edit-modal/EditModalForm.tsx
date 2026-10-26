@@ -9,12 +9,11 @@ import {createTipoPermiso, updateTipoPermiso} from '../core/_requests'
 import {useQueryResponse} from '../core/QueryResponseProvider'
 import {toast} from 'react-toastify'
 import {ListLoading} from 'src/app/modules/components/loading/ListLoading'
-import {CKEditor} from '@ckeditor/ckeditor5-react'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import {FormActions} from 'src/app/modules/components/FormActions'
 import {ValidationError} from 'src/app/utils/httpErrors'
 import {useApiFieldErrors} from 'src/app/hooks/useApiFieldErrors'
 import {SelectField} from 'src/app/modules/components/SelectField'
+import {RichTextEditorField} from 'src/app/modules/components/RichTextEditorField'
 
 type Props = {
   isLoading: boolean
@@ -98,8 +97,15 @@ const EditModalForm: FC<Props> = ({tipoPermiso, isLoading, onClose}) => {
     },
   })
 
+  const shouldShowFieldError = (fieldName: string) => {
+    return Boolean(getFieldError(formik.errors, fieldName)) && (
+      Boolean(formik.touched[fieldName]) ||
+      formik.submitCount > 0
+    )
+  }
+
   const isFieldValid = (fieldName: string) => {
-    return !(formik.touched[fieldName] && getFieldError(formik.errors, fieldName))
+    return !shouldShowFieldError(fieldName)
   }
 
   return (
@@ -172,27 +178,19 @@ const EditModalForm: FC<Props> = ({tipoPermiso, isLoading, onClose}) => {
           {/* Requisito (CKEditor) */}
           <div className='fv-row mb-7 px-1'>
             <label className='fw-bold fs-6 mb-2 required'>Requisitos</label>
-            <div
-              className={clsx('form-control form-control-solid p-0', {
-                'is-invalid': !isFieldValid('instruccion'),
-                'is-valid': formik.touched.instruccion && isFieldValid('instruccion'),
-              })}
-            >
-              <CKEditor
-                editor={ClassicEditor as any}
-                data={formik.values.instruccion || ''}
-                onChange={(_, editor) => {
-                  const data = editor.getData()
-                  formik.setFieldValue('instruccion', data)
-                  clearFieldError('instruccion')
-                }}
-                onBlur={() => formik.setFieldTouched('instruccion', true)}
-                config={{
-                  placeholder: 'Escriba los requisitos aquí...',
-                  toolbar: ['undo', 'redo', 'bold', 'numberedList', 'bulletedList'],
-                }}
-              />
-            </div>
+            <RichTextEditorField
+              value={formik.values.instruccion || ''}
+              onChange={(data) => {
+                formik.setFieldValue('instruccion', data)
+                clearFieldError('instruccion')
+              }}
+              onBlur={() => formik.setFieldTouched('instruccion', true)}
+              isInvalid={!isFieldValid('instruccion')}
+              isValid={Boolean(formik.touched.instruccion) && isFieldValid('instruccion')}
+              disabled={formik.isSubmitting}
+              placeholder='Escriba los requisitos aquí...'
+              toolbar={['undo', 'redo', 'bold', 'numberedList', 'bulletedList']}
+            />
             {!isFieldValid('instruccion') && (
               <div className='fv-plugins-message-container'>
                 <span role='alert'>{getFieldError(formik.errors, 'instruccion')}</span>

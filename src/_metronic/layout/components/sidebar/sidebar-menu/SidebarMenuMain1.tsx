@@ -63,6 +63,10 @@ const SidebarMenuMain = () => {
         icon='calendar-search'
         fontIcon='bi-person'
       />
+      <SidebarMenuItemWithSub to='/apps/horarios' title='Horarios' fontIcon='bi-clock' icon='time'>
+        <SidebarMenuItem to='/apps/horarios/tipos' title='Tipos de horario' hasBullet={true} />
+        <SidebarMenuItem to='/apps/horarios/alternos' title='Horarios alternos' hasBullet={true} />
+      </SidebarMenuItemWithSub>
 
       <SidebarMenuItem
         to='/apps/asistencia/listar'

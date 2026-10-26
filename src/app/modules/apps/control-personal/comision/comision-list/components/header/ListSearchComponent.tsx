@@ -14,7 +14,7 @@ const ListSearchComponent = () => {
   // ... if searchTerm has not been updated within last 500ms.
   // The goal is to only have the API call fire when user stops typing ...
   // ... so that we aren't hitting our API rapidly.
-  const debouncedSearchTerm = useDebounce(searchTerm, 150)
+  const debouncedSearchTerm = useDebounce(searchTerm, 500)
   // Effect for API call
   useEffect(
     () => {
@@ -27,27 +27,28 @@ const ListSearchComponent = () => {
   )
 
   return (
-    <div className='card-title'>
-      {/* begin::Search */}
+    <div className='d-flex align-items-center gap-3 w-100 flex-nowrap'>
       <button
         type='button'
-        className='btn btn-light btn-sm mx-2'
+        className='btn btn-light btn-sm d-inline-flex align-items-center justify-content-center flex-shrink-0'
         onClick={() => {
           queryClient.invalidateQueries([`${QUERIES.COMISIONES_LIST}-${query}`])
         }}
         title='Actualizar tabla'
+        style={{width: '44px', minWidth: '44px', height: '44px', padding: 0}}
       >
         <KTIcon iconName='arrows-circle' className='fs-1' />
       </button>
-      <div className='d-flex align-items-center position-relative my-1'>
+      <div className='d-flex align-items-center position-relative flex-grow-1'>
         <KTIcon iconName='magnifier' className='fs-1 position-absolute ms-6' />
         <input
           type='text'
           data-kt-user-table-filter='search'
-          className='form-control form-control-solid w-250px ps-14 pe-14'
+          className='form-control form-control-solid ps-14 pe-14'
           placeholder='Buscar ...'
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          style={{width: '100%', minWidth: 0, height: '44px'}}
         />
         {searchTerm && (
           <span
@@ -59,8 +60,6 @@ const ListSearchComponent = () => {
           </span>
         )}
       </div>
-
-      {/* end::Search */}
     </div>
   )
 }

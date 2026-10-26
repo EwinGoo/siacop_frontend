@@ -3,20 +3,18 @@ import {FC} from 'react'
 import {useIntl} from 'react-intl'
 import {toAbsoluteUrl} from '../../../_metronic/helpers'
 import {PageTitle} from '../../../_metronic/layout/core'
-import {
-  ListsWidget2,
-  ListsWidget3,
-  ListsWidget4,
-  ListsWidget6,
-  TablesWidget5,
-  TablesWidget10,
-  MixedWidget8,
-  CardsWidget7,
-  CardsWidget17,
-  CardsWidget20,
-  ListsWidget26,
-  EngageWidget10,
-} from '../../../_metronic/partials/widgets'
+import {ListsWidget2} from '../../../_metronic/partials/widgets/lists/ListsWidget2'
+import {ListsWidget3} from '../../../_metronic/partials/widgets/lists/ListsWidget3'
+import {ListsWidget4} from '../../../_metronic/partials/widgets/lists/ListsWidget4'
+import {ListsWidget6} from '../../../_metronic/partials/widgets/lists/ListsWidget6'
+import {TablesWidget5} from '../../../_metronic/partials/widgets/tables/TablesWidget5'
+import {TablesWidget10} from '../../../_metronic/partials/widgets/tables/TablesWidget10'
+import {MixedWidget8} from '../../../_metronic/partials/widgets/mixed/MixedWidget8'
+import {CardsWidget7} from '../../../_metronic/partials/widgets/_new/cards/CardsWidget7'
+import {CardsWidget17} from '../../../_metronic/partials/widgets/_new/cards/CardsWidget17'
+import {CardsWidget20} from '../../../_metronic/partials/widgets/_new/cards/CardsWidget20'
+import {ListsWidget26} from '../../../_metronic/partials/widgets/_new/lists/ListsWidget26'
+import {EngageWidget10} from '../../../_metronic/partials/widgets/_new/engage/EngageWidget10'
 
 const DashboardPage: FC = () => (
   <>
@@ -115,6 +113,7 @@ const DashboardPage: FC = () => (
 
 const DashboardWrapper: FC = () => {
   const intl = useIntl()
+
   return (
     <>
       <PageTitle breadcrumbs={[]}>{intl.formatMessage({id: 'MENU.DASHBOARD'})}</PageTitle>

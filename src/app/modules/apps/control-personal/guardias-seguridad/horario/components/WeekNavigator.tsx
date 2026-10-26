@@ -5,8 +5,12 @@ type Props = {
   onPrev: () => void
   onNext: () => void
   onHoy: () => void
+  onSelectDate: (fecha: string) => void
   posicionCiclo: number | null
   numeroCiclo: number | null
+  showInfoToggle?: boolean
+  infoOpen?: boolean
+  onToggleInfo?: () => void
 }
 
 const BADGE_CICLO = ['badge-light-primary', 'badge-light-warning', 'badge-light-danger']
@@ -20,7 +24,18 @@ const formatDateRange = (fechaInicio: string) => {
   return `${start.toLocaleDateString('es-ES', opts)} — ${end.toLocaleDateString('es-ES', optsYear)}`
 }
 
-const WeekNavigator = ({fechaInicio, onPrev, onNext, onHoy, posicionCiclo, numeroCiclo}: Props) => {
+const WeekNavigator = ({
+  fechaInicio,
+  onPrev,
+  onNext,
+  onHoy,
+  onSelectDate,
+  posicionCiclo,
+  numeroCiclo,
+  showInfoToggle = false,
+  infoOpen = false,
+  onToggleInfo,
+}: Props) => {
   const badgeClass = posicionCiclo ? BADGE_CICLO[(posicionCiclo - 1) % 3] : 'badge-light-secondary'
 
   return (
@@ -43,10 +58,32 @@ const WeekNavigator = ({fechaInicio, onPrev, onNext, onHoy, posicionCiclo, numer
           <KTIcon iconName='arrow-right' className='fs-2' />
         </button>
       </div>
-      <button className='btn btn-light-primary btn-sm' onClick={onHoy}>
-        <KTIcon iconName='calendar' className='fs-4 me-1' />
-        Semana actual
-      </button>
+      <div className='d-flex align-items-center gap-2 flex-wrap justify-content-end'>
+        <div className='d-flex align-items-center gap-2'>
+          <span className='text-muted fs-8 fw-semibold'>Ir a fecha</span>
+          <input
+            type='date'
+            className='form-control form-control-sm w-auto'
+            value={fechaInicio}
+            onChange={(event) => onSelectDate(event.target.value)}
+            title='Seleccionar una fecha para ir a su semana'
+          />
+        </div>
+        <button className='btn btn-light-primary btn-sm' onClick={onHoy}>
+          <KTIcon iconName='calendar' className='fs-4 me-1' />
+          Semana actual
+        </button>
+        {showInfoToggle && (
+          <button
+            type='button'
+            className={`btn btn-icon btn-sm ${infoOpen ? 'btn-primary' : 'btn-light-primary'}`}
+            onClick={onToggleInfo}
+            title='Mostrar ayuda de la vista calendario'
+          >
+            <KTIcon iconName='information-5' className='fs-4' />
+          </button>
+        )}
+      </div>
     </div>
   )
 }

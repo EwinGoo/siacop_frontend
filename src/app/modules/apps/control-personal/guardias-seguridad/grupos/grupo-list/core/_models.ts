@@ -1,19 +1,20 @@
 import {ID, PaginationState} from '../../../../../../../../_metronic/helpers'
 
 export type GrupoMiembro = {
-  id_grupo_miembro?: ID
-  id_grupo?: number
+  id_guardia_grupo_miembro?: ID
+  id_guardia_grupo?: number
   id_persona?: number
-  id_bloque?: number | null
+  id_guardia_bloque?: number | null
   ci?: string
   nombre?: string
   paterno?: string
   materno?: string
+  nombre_completo?: string
   nombre_bloque?: string | null
 }
 
 export type Grupo = {
-  id_grupo?: ID
+  id_guardia_grupo?: ID
   nombre?: string
   descripcion?: string | null
   orden?: number

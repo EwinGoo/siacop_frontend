@@ -11,10 +11,12 @@ import {
   ApiResponse,
   AutocompleteResponse,
   SucursalCajaSalud,
+  ComisionPDFData,
+  ReporteGeneralComisionParams,
 } from './_models'
 import {API_ROUTES} from 'src/app/config/apiRoutes'
 import {ValidationError} from 'src/app/utils/httpErrors'
-import { TipoPermiso } from '../../../permisos/tipos-permisos/list/core/_models'
+import {TipoPermiso} from '../../../permisos/tipos-permisos/list/core/_models'
 
 export const COMISION_URL = API_ROUTES.CONTROL_PERSONAL + '/boletas-comision'
 
@@ -77,11 +79,12 @@ const createComision = async (comision: Comision): Promise<Comision> => {
     return response.data.data
   } catch (error: any) {
     const status = error?.response?.status
-    const validationErrors = error?.response?.data?.validation_errors
+    const validationErrors =
+      error?.response?.data?.validation_errors || error?.response?.data?.data || {}
     const message = error?.response?.data?.message || 'Ocurrió un error'
 
     if (status === 400 || status === 422) {
-      throw new ValidationError(validationErrors || {}, message)
+      throw new ValidationError(validationErrors, message)
     }
 
     throw new Error(message)
@@ -95,8 +98,11 @@ const updateComision = async (comision: Comision): Promise<Comision> => {
     return response.data.data
   } catch (error: any) {
     if (error.response?.status === 422 || error.response?.status === 400) {
+      const validationErrors =
+        error.response.data.validation_errors || error.response.data.data || {}
+
       throw new ValidationError(
-        error.response.data.validation_errors || {},
+        validationErrors,
         error.response.data.message
       )
     }
@@ -202,6 +208,73 @@ const procesarEstadoComision = (
 
   return axiosClient.post(`${COMISION_URL}/comision-qr`, requestData)
 }
+
+const buildBoletaFilename = (identifier: string): string => {
+  const safeIdentifier = identifier.replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase()
+  return `BOLETA_COMISION_${safeIdentifier}.PDF`
+}
+
+const getBlobErrorMessage = async (error: any): Promise<string> => {
+  const data = error?.response?.data
+
+  if (data instanceof Blob) {
+    const text = await data.text()
+    try {
+      const parsed = JSON.parse(text)
+      return parsed.message || 'Datos personales no disponibles. Intente más tarde.'
+    } catch {
+      return text || 'Datos personales no disponibles. Intente más tarde.'
+    }
+  }
+
+  return error?.response?.data?.message || 'Datos personales no disponibles. Intente más tarde.'
+}
+
+const imprimirComisionFormulario = async (
+  hash: string,
+  carnet?: string | null
+): Promise<ComisionPDFData> => {
+  try {
+    const response = await axiosClient.get<Blob>(`${COMISION_URL}/reporte/${hash}`, {
+      responseType: 'blob',
+    })
+    const filename = buildBoletaFilename(carnet || hash)
+
+    return {
+      blob: response.data,
+      filename,
+    }
+  } catch (error: any) {
+    throw new Error(await getBlobErrorMessage(error))
+  }
+}
+
+const generarReporteGeneralComision = async (
+  params: ReporteGeneralComisionParams
+): Promise<ComisionPDFData> => {
+  try {
+    const formData = new FormData()
+    formData.append('fechaInicio', params.fechaInicio)
+    formData.append('fechaFin', params.fechaFin)
+    formData.append('estado', params.estado)
+    formData.append('tipoComision', params.tipoComision)
+
+    const response = await axiosClient.post<Blob>(`${COMISION_URL}/reporte-general`, formData, {
+      responseType: 'blob',
+    })
+
+    const tipoReporte = params.tipoComision === 'BAJA_MEDICA' ? 'BAJAS_MEDICAS' : 'BOLETAS_COMISION'
+
+    return {
+      blob: response.data,
+      filename: `REPORTE_${tipoReporte}.PDF`,
+      title: 'Reporte de comisiones',
+    }
+  } catch (error: any) {
+    throw new Error(await getBlobErrorMessage(error))
+  }
+}
+
 export {
   getComisiones,
   deleteComision,
@@ -216,5 +289,7 @@ export {
   getPersonaAutocomplete,
   verficarAsignacion,
   getTiposPermiso,
-  getCajaSaludSucursales
+  getCajaSaludSucursales,
+  imprimirComisionFormulario,
+  generarReporteGeneralComision,
 }

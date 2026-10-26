@@ -40,7 +40,7 @@ export const ReportModalForm = ({
       <div className='modal-body py-0'>
         <div className='row mb-4'>
           <p className='text-muted mb-4'>
-            Seleccione el rango de fechas para generar el reporte de boletas recepcionadas.
+            Seleccione el rango de fechas para generar el reporte de permisos.
           </p>
           <div className='col-md-6'>
             <label className='form-label fw-semibold'>📅 Fecha de inicio</label>
@@ -87,7 +87,7 @@ export const ReportModalForm = ({
           </div> */}
 
           <div className='col-md-6 mb-4 mt-4'>
-            <label className='form-label fw-semibold'>🚗 Tipo de Permiso</label>
+            <label className='form-label fw-semibold'>Tipo de Permiso</label>
             <SelectField
               field={formik.getFieldProps('tipoPermiso')}
               form={formik}
@@ -104,8 +104,17 @@ export const ReportModalForm = ({
         <button type='button' className='btn btn-light' onClick={onClose}>
           <i className='bi bi-x-circle me-2'></i> Cancelar
         </button>
-        <button type='submit' className='btn btn-primary'>
-          <i className='bi bi-file-earmark-bar-graph me-2'></i> Generar Reporte
+        <button type='submit' className='btn btn-primary' disabled={formik.isSubmitting}>
+          {formik.isSubmitting ? (
+            <>
+              <span className='spinner-border spinner-border-sm me-2' />
+              Generando...
+            </>
+          ) : (
+            <>
+              <i className='bi bi-file-earmark-bar-graph me-2'></i> Generar Reporte
+            </>
+          )}
         </button>
       </div>
     </form>

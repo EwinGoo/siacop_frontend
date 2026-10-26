@@ -15,7 +15,9 @@ const ListViewProvider: FC<WithChildren> = ({children}) => {
   const [selected, setSelected] = useState<Array<ID>>(initialListView.selected)
   const [itemIdForUpdate, setItemIdForUpdate] = useState<ID>(initialListView.itemIdForUpdate)
   const [isShow, setIsShow] = useState<boolean>(initialListView.isShow)
-  const [accion, setAccion] = useState<'editar' | 'aprobar' | 'observar' | 'report' | undefined>(undefined)
+  const [accion, setAccion] = useState<
+    'editar' | 'aprobar' | 'observar' | 'report' | 'ver' | undefined
+  >(undefined)
 
   const {isLoading} = useQueryResponse()
   const data = useQueryResponseData()

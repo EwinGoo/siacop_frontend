@@ -58,11 +58,12 @@ const createTipoPermiso = async (comision: TipoPermiso): Promise<TipoPermiso> =>
     return response.data.data
   } catch (error: any) {
     const status = error?.response?.status
-    const validationErrors = error?.response?.data?.validation_errors
+    const validationErrors =
+      error?.response?.data?.validation_errors || error?.response?.data?.data || {}
     const message = error?.response?.data?.message || 'Ocurrió un error'
 
     if (status === 400 || status === 422) {
-      throw new ValidationError(validationErrors || {}, message)
+      throw new ValidationError(validationErrors, message)
     }
 
     throw new Error(message)  
@@ -75,8 +76,11 @@ const updateTipoPermiso = async (tipoPermiso: TipoPermiso): Promise<TipoPermiso>
     return response.data.data
   } catch (error: any) {
     if (error.response?.status === 422 || error.response?.status === 400) {
+      const validationErrors =
+        error.response.data.validation_errors || error.response.data.data || {}
+
       throw new ValidationError(
-        error.response.data.validation_errors || {},
+        validationErrors,
         error.response.data.message
       )
     }

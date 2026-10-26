@@ -3,12 +3,13 @@ import {useQuery, useQueryClient} from 'react-query'
 import Swal from 'sweetalert2'
 import {KTCard, KTCardBody, KTIcon, QUERIES} from 'src/_metronic/helpers'
 import {getHorarioSemana, generarSemana} from './core/_requests'
-import {AsignacionDia, ConfiguracionCiclo} from './core/_models'
+import {AsignacionDia, ConfiguracionCiclo, HorarioBusquedaTarget} from './core/_models'
 import {WeekNavigator} from './components/WeekNavigator'
 import {HorarioCalendario} from './components/HorarioCalendario'
 import {HorarioTabla} from './components/HorarioTabla'
 import {ConfiguracionModal} from './components/ConfiguracionModal'
 import {AsignacionModal} from './components/AsignacionModal'
+import {BuscarGuardiaModal} from './components/BuscarGuardiaModal'
 import {usePermissions} from 'src/app/modules/auth/hooks/usePermissions'
 
 const getLunesActual = (): string => {
@@ -25,6 +26,14 @@ const addWeeks = (fecha: string, n: number): string => {
   return d.toISOString().slice(0, 10)
 }
 
+const getLunesDeFecha = (fecha: string): string => {
+  const dia = new Date(fecha + 'T12:00:00')
+  const dayOfWeek = dia.getDay()
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+  dia.setDate(dia.getDate() + diff)
+  return dia.toISOString().slice(0, 10)
+}
+
 type Vista = 'calendario' | 'tabla'
 
 const HorarioPage = () => {
@@ -32,8 +41,11 @@ const HorarioPage = () => {
   const queryClient = useQueryClient()
   const [fechaInicio, setFechaInicio] = useState<string>(getLunesActual)
   const [vista, setVista] = useState<Vista>('calendario')
+  const [showCalendarInfo, setShowCalendarInfo] = useState(false)
   const [showConfigModal, setShowConfigModal] = useState(false)
   const [asignacionModal, setAsignacionModal] = useState<{fecha: string; asignacion?: AsignacionDia} | null>(null)
+  const [showBuscarModal, setShowBuscarModal] = useState(false)
+  const [focusTarget, setFocusTarget] = useState<HorarioBusquedaTarget | null>(null)
   const [generando, setGenerando] = useState(false)
 
   const queryKey = `${QUERIES.GUARDIA_HORARIO}-${fechaInicio}`
@@ -107,11 +119,10 @@ const HorarioPage = () => {
           <div className='card-toolbar d-flex gap-2'>
             {/* Selector de vista */}
             <div className='btn-group'>
-              <button
-                className={`btn btn-sm ${vista === 'calendario' ? 'btn-primary' : 'btn-light'}`}
-                onClick={() => setVista('calendario')}
-                title='Vista calendario'
-              >
+                <button
+                  className={`btn btn-sm ${vista === 'calendario' ? 'btn-primary' : 'btn-light'}`}
+                  onClick={() => setVista('calendario')}
+                >
                 <KTIcon iconName='calendar-2' className='fs-4 me-1' />
                 Calendario
               </button>
@@ -124,6 +135,16 @@ const HorarioPage = () => {
                 Tabla
               </button>
             </div>
+
+            <button
+              className='btn btn-light-primary btn-sm'
+              onClick={() => setShowBuscarModal(true)}
+              title='Buscar guardia en la semana'
+              disabled={isLoading || !horario}
+            >
+              <KTIcon iconName='magnifier' className='fs-4 me-1' />
+              Buscar guardia
+            </button>
 
             {guardiaSeguridad.canManage && (
               <>
@@ -159,8 +180,12 @@ const HorarioPage = () => {
             onPrev={() => setFechaInicio(addWeeks(fechaInicio, -1))}
             onNext={() => setFechaInicio(addWeeks(fechaInicio, 1))}
             onHoy={() => setFechaInicio(getLunesActual())}
+            onSelectDate={(fecha) => fecha && setFechaInicio(getLunesDeFecha(fecha))}
             posicionCiclo={horario?.semana?.posicion_ciclo ?? null}
             numeroCiclo={horario?.semana?.numero_ciclo ?? null}
+            showInfoToggle={vista === 'calendario'}
+            infoOpen={showCalendarInfo}
+            onToggleInfo={() => setShowCalendarInfo((prev) => !prev)}
           />
 
           {/* Sin configuración */}
@@ -182,22 +207,40 @@ const HorarioPage = () => {
           )}
 
           {/* Leyenda de turnos */}
-          {horario && (
-            <div className='d-flex flex-wrap gap-3 mb-5'>
-              {horario.turnos.map((t) => (
-                <div
-                  key={t.id_turno}
-                  className='d-flex align-items-center gap-2 px-3 py-2 rounded'
-                  style={{background: t.color + '15', border: `1px solid ${t.color}40`}}
-                >
-                  <span className='bullet bullet-dot' style={{background: t.color}}></span>
-                  <span className='fw-bold fs-7' style={{color: t.color}}>{t.nombre}</span>
-                  <span className='text-muted fs-8'>{t.hora_inicio.slice(0,5)}–{t.hora_fin.slice(0,5)}</span>
+          {vista === 'calendario' && horario && (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateRows: showCalendarInfo ? '1fr' : '0fr',
+                opacity: showCalendarInfo ? 1 : 0,
+                transition: 'grid-template-rows 180ms ease, opacity 180ms ease',
+              }}
+              className='mb-5'
+            >
+              <div style={{overflow: 'hidden'}}>
+                <div className='rounded border border-dashed border-gray-300 bg-light p-4 mt-1'>
+                  <div className='d-flex flex-wrap gap-3'>
+                    {horario.turnos.map((t) => (
+                      <div
+                        key={t.id_guardia_turno}
+                        className='d-flex align-items-center gap-2 px-3 py-2 rounded'
+                        style={{background: t.color + '15', border: `1px solid ${t.color}40`}}
+                      >
+                        <span className='bullet bullet-dot' style={{background: t.color}}></span>
+                        <span className='fw-bold fs-7 text-uppercase' style={{color: t.color}}>
+                          {t.nombre}
+                        </span>
+                        <span className='text-muted fs-8'>
+                          {t.hora_inicio.slice(0,5)}-{t.hora_fin.slice(0,5)}
+                        </span>
+                      </div>
+                    ))}
+                    <div className='d-flex align-items-center gap-1 px-2 py-1 rounded bg-white border fs-8 text-muted'>
+                      <span className='badge badge-light-danger me-1 py-1'>EMG</span>= Emergencia
+                      <span className='badge badge-light-warning ms-2 me-1 py-1'>MAN</span>= Manual
+                    </div>
+                  </div>
                 </div>
-              ))}
-              <div className='d-flex align-items-center gap-1 px-2 py-1 rounded bg-light border fs-8 text-muted'>
-                <span className='badge badge-light-danger me-1 py-1'>EMG</span>= Emergencia
-                <span className='badge badge-light-warning ms-2 me-1 py-1'>MAN</span>= Manual
               </div>
             </div>
           )}
@@ -213,10 +256,11 @@ const HorarioPage = () => {
             <HorarioCalendario
               horario={horario}
               canManage={guardiaSeguridad.canManage}
+              focusTarget={focusTarget}
               onEditAsignacion={(fecha, asig) => setAsignacionModal({fecha, asignacion: asig})}
             />
           ) : (
-            <HorarioTabla horario={horario} />
+            <HorarioTabla horario={horario} focusTarget={focusTarget} />
           )}
         </KTCardBody>
       </KTCard>
@@ -227,6 +271,17 @@ const HorarioPage = () => {
           configuracion={horario?.configuracion ?? null}
           onClose={() => setShowConfigModal(false)}
           onSaved={handleConfigSaved}
+        />
+      )}
+
+      {showBuscarModal && horario && (
+        <BuscarGuardiaModal
+          horario={horario}
+          onClose={() => setShowBuscarModal(false)}
+          onFound={(target) => {
+            setFocusTarget({...target})
+            setShowBuscarModal(false)
+          }}
         />
       )}
 

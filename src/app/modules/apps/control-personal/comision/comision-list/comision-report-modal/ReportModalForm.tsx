@@ -114,8 +114,17 @@ export const ReportModalForm = ({
         <button type='button' className='btn btn-light' onClick={onClose}>
           <i className='bi bi-x-circle me-2'></i> Cancelar
         </button>
-        <button type='submit' className='btn btn-primary'>
-          <i className='bi bi-file-earmark-bar-graph me-2'></i> Generar Reporte
+        <button type='submit' className='btn btn-primary' disabled={formik.isSubmitting}>
+          {formik.isSubmitting ? (
+            <>
+              <span className='spinner-border spinner-border-sm me-2' role='status'></span>
+              Generando...
+            </>
+          ) : (
+            <>
+              <i className='bi bi-file-earmark-bar-graph me-2'></i> Generar Reporte
+            </>
+          )}
         </button>
       </div>
     </form>
