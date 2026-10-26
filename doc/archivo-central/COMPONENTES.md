@@ -2,7 +2,7 @@
 
 - `ExpedienteDetalle`: valida persona, consulta identidad/resumen y monta un único `DocumentoLista`; conserva estados sin expediente, carga y error. Eliminado el estado local de sección y los paneles comentados.
 - `ExpedienteEncabezado`: KTCard/KTCardBody/KTIcon de Metronic instalado. Identidad, CI, código y total documental. Simplificado a props persona/cantidad, sin navegación por secciones, refs de botones ni conteos por pestaña. No restaura enlaces retirados por el usuario.
-- `DocumentoLista`: encabezados con clases originales table-sort/table-sort-asc/table-sort-desc de Metronic 8.2.0, botones semánticos sin apariencia de botón y foco visible local en DocumentoLista.module.scss; tabla compartida entre ambos modos. Catálogo completo de categorías, búsqueda automática tras 500 ms sin nuevas pulsaciones, orden por encabezados y paginación de servidor. Conserva categoría en negrita, nombre y descripción. Las fechas nulas usan Sin dato. Registro documental permanece deshabilitado en gestión.
+- `DocumentoLista`: encabezados con clases originales table-sort/table-sort-asc/table-sort-desc de Metronic 8.2.0, botones semánticos sin apariencia de botón y foco visible local en DocumentoLista.module.scss; tabla compartida entre ambos modos. Catálogo de categorías activas proporcionado por backend, búsqueda automática tras 500 ms sin nuevas pulsaciones, orden por encabezados y paginación de servidor. Conserva categoría en negrita, nombre y descripción. Las fechas nulas usan Sin dato. Registro documental permanece deshabilitado en gestión.
 - `DocumentoVisor`: modal existente, sin rediseño en esta tarea. Mantiene disponibilidad, permisos, liberación de recursos y foco al cerrar.
 - `Paginacion` y `useDocumentos`: reutilizados sin cambio; filtros/orden integrados en la clave de caché existente.
 
@@ -27,7 +27,7 @@ Ajuste de ordenamiento Metronic: modificados `components/DocumentoLista.tsx`, `_
 ## Selector de categorías y búsqueda documental
 
 - Compartido: `src/app/modules/components/SelectorBuscable.tsx`, `SelectorBuscable.module.scss` y su declaración `.scss.d.ts`. Wrapper controlado de react-select 5.10.1 ya instalado; sin Formik, any, jQuery ni dependencias nuevas. Recibe opciones, ID seleccionado, etiqueta por inputId y callback de cambio. No mantiene una segunda selección.
-- `DocumentoLista.tsx` transforma el catálogo existente a opciones con useMemo, preserva nombres originales y agrega el indicador histórico y la opción Todas las categorías. El callback guarda `categoria_id` numérico o undefined y reinicia página mediante actualización funcional, conservando búsqueda/orden.
+- `DocumentoLista.tsx` transforma el catálogo existente a opciones con useMemo, preserva nombres originales y agrega la opción Todas las categorías; el indicador histórico queda como compatibilidad, sin entradas inactivas en la API vigente. El callback guarda `categoria_id` numérico o undefined y reinicia página mediante actualización funcional, conservando búsqueda/orden.
 - El texto de búsqueda documental conserva un borrador local para debounce de 500 ms; el criterio aplicado vive en filtros. Un único temporizador se cancela al escribir/desmontar. Texto equivalente tras trim conserva la referencia de filtros, sin consulta adicional. El icono KTIcon magnifier y form-control-solid reutilizan el patrón del buscador administrativo. No existe botón Buscar.
 - Pruebas nuevas: `__tests__/buscador.test.tsx`; adaptadas `__tests__/interfaz.test.tsx`. Los hooks/requests/API no se modifican.
 
@@ -43,3 +43,11 @@ Esta sección sustituye las afirmaciones anteriores de ausencia de componentes/e
 - `core/requests.ts`: mutaciones con el cliente Axios compartido, sesión y CSRF nativo obtenido antes de cada operación; token enviado en cuerpo, compatible con CORS actual. Sin reintentos automáticos de escritura. Conserva errores por campo.
 
 Editar metadatos y reemplazar un PDF ya registrado no se implementan en esta entrega. Ninguna dependencia nueva.
+
+## Actualización vigente — 2026-10-26
+
+AdministrativoBuscador controla limit=50 para AdministrativoTabla, que representa la página recibida. DocumentoLista también usa limit=50; ambos se comparten entre auditoría y gestión. No se agregan filas ficticias cuando hay menos de 50 resultados.
+
+DocumentoLista incluye el enlace de icono bi-file-earmark-pdf (text-danger, btn-light), con target=_blank, rel=noopener noreferrer y nombre accesible. Cuando el archivo no está disponible, muestra un botón deshabilitado con text-muted. Ver detalle conserva DocumentoVisor. El endpoint preview pertenece al backend: no se expone un enlace temporal de MinIO.
+
+El backend exige documento de catálogo y categoría activos en listados, conteos, catálogos y PDF directo. Se conserva la lista de funcionarios sin filtrar estado_administrativo ni persona.estado.

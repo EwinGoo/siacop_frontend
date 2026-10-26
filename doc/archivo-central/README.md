@@ -1,6 +1,15 @@
 # Archivo Central: frontend
 
-Fecha: 2026-10-22. Estado: Fase 2 implementada. Pruebas y build habitual aprobados; CI estricto y revisión visual pendientes, detallados en PRUEBAS.md.
+Actualizado: 2026-10-26. Consulta, visor y gestión documental integrados con el backend MinIO. Las secciones de fases anteriores conservan antecedentes; el comportamiento vigente se resume a continuación. Resultados y límites de validación en PRUEBAS.md.
+
+## Comportamiento vigente
+
+- Auditoría y Archivo Central comparten los listados: 50 administrativos o documentos por página, con paginación del servidor. Si hay menos de 50 resultados, se muestran los existentes; el total no es el tamaño de página.
+- Solo se muestran documentos y categorías activos según el backend: estado_documento=1 y estado_documento_tipo=1. Los funcionarios no se filtran por estado.
+- El icono bi-file-earmark-pdf usa text-danger sobre btn-light cuando el PDF está disponible; se muestra text-muted y deshabilitado cuando no está disponible. Abre el endpoint autenticado preview con target=_blank y rel=noopener noreferrer. Ver detalle conserva el modal.
+- No se usan enlaces temporales ni públicos de MinIO. El backend entrega el PDF por streaming; abrir el enlace requiere sesión y grupo autorizado.
+- Gestión depende de grupos, CSRF y escrituras_habilitadas; edición y reemplazo de documentos registrados siguen pendientes.
+- Sin builds por indicación del usuario. Las validaciones de esta actualización se detallan en PRUEBAS.md.
 
 - [Análisis real](ANALISIS_REPOSITORIO.md)
 - [Pantallas y arquitectura](PANTALLAS.md)
@@ -12,7 +21,7 @@ Fecha: 2026-10-22. Estado: Fase 2 implementada. Pruebas y build habitual aprobad
 Se autorizan consultas generales por grupos de sesión. Auditoría y operador tienen interfaces diferentes; no se crea un sistema de permisos específicos para este módulo. Las escrituras futuras permanecen bloqueadas por backend y UI. Históricos sin integración muestran estado explícito de indisponibilidad.
 
 
-## Backend disponible
+## Antecedentes de Fase 2: backend disponible
 
 La Fase 1 ya implementa los cinco GET de consulta. Su contrato y verificaciones están en la documentación canónica del backend. Las pantallas React y las entradas de menú están implementadas. Gestión documental y almacenamiento permanecen pendientes.
 
@@ -25,7 +34,7 @@ La Fase 1 ya implementa los cinco GET de consulta. Su contrato y verificaciones 
 
 Se mantiene el layout actual. MenuBuilder proporciona entradas diferentes por grupo. La entrada raíz de React redirige al operador a Archivo Central y al grupo auditoria a su consulta; si tiene ambos, se prefiere gestión. Los demás grupos conservan su entrada.
 
-La búsqueda se ejecuta al enviar el formulario; no se descargan todos los administrativos ni se hacen solicitudes por cada pulsación. Los filtros, orden y página se guardan en la URL. El detalle preserva la ruta de retorno. No se almacenan documentos ni datos personales en localStorage.
+La búsqueda se ejecuta automáticamente tras 500 ms sin pulsaciones; no se descargan todos los administrativos. Los filtros, orden y página se guardan en la URL. El detalle preserva la ruta de retorno. No se almacenan documentos ni datos personales en localStorage.
 
 [Archivos, decisiones y validación](PRUEBAS.md).
 

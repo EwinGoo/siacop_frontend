@@ -4,7 +4,7 @@ Decisión autorizada el 2026-10-23: sustituir la navegación por secciones por u
 
 Se reutilizan KTCard, KTCardBody, KTIcon, PageTitle, tabla responsive y controles Bootstrap/Metronic de la integración React 8.2.0 Demo1. No se copian dependencias del template adicional 8.0.38.
 
-Categoría por defecto: Todas las categorías, incluyendo históricas. No se muestra el selector Ordenar por. Los botones nativos en cuatro encabezados admiten Tab, Enter y Espacio, usan foco del tema y una altura mínima de 44 px. Solo la columna activa expone aria-sort. Los indicadores SVG originales del tema señalan la dirección en la columna activa; las columnas inactivas reservan el espacio del indicador con table-sort. El nombre accesible anuncia la siguiente dirección.
+Categoría por defecto: Todas las categorías activas devueltas por el backend. Desde 2026-10-26 se excluyen documentos con catálogo o categoría inactivos. No se muestra el selector Ordenar por. Los botones nativos en cuatro encabezados admiten Tab, Enter y Espacio, usan foco del tema y una altura mínima de 44 px. Solo la columna activa expone aria-sort. Los indicadores SVG originales del tema señalan la dirección en la columna activa; las columnas inactivas reservan el espacio del indicador con table-sort. El nombre accesible anuncia la siguiente dirección.
 
 En móvil los filtros se apilan y la tabla se desplaza horizontalmente dentro de una región etiquetada y enfocable, sin ocultar las fechas ordenables. No se añaden colores fijos, estadísticas inventadas ni avatares de muestra. El visor existente mantiene su comportamiento.
 
@@ -26,7 +26,7 @@ No se copia react-table, @ts-nocheck ni el tercer estado de orden del demo: se c
 
 react-select 5.10.1 ya figura en package.json de SIACOP. Se inspeccionaron SelectField.tsx y selectStyles.ts: el wrapper existente está acoplado a Formik y usa estilos inline con colores fijos; por eso se reutiliza la librería mediante un wrapper controlado tipado y estilos encapsulados. No se instala ni copia Select2 del template.
 
-Categoría muestra Todas las categorías inicialmente. Escribir filtra localmente de inmediato por parte del nombre sin distinguir mayúsculas ni tildes; no hace peticiones HTTP para buscar opciones. Se preservan nombres y el indicador (histórica). Elegir una opción cierra el menú y consulta por ID numérico; limpiar mediante la cruz o Retroceso, o elegir Todas las categorías, aplica undefined. Flechas/Enter/Escape y mensajes ARIA están a cargo de react-select, con etiqueta Categoría asociada al input.
+Categoría muestra Todas las categorías inicialmente. Escribir filtra localmente de inmediato por parte del nombre sin distinguir mayúsculas ni tildes; no hace peticiones HTTP para buscar opciones. Se preservan los nombres originales. El componente conserva compatibilidad con el indicador (histórica), pero la API vigente solo devuelve categorías activas. Elegir una opción cierra el menú y consulta por ID numérico; limpiar mediante la cruz o Retroceso, o elegir Todas las categorías, aplica undefined. Flechas/Enter/Escape y mensajes ARIA están a cargo de react-select, con etiqueta Categoría asociada al input.
 
 Control mínimo 44 px, ancho responsive, bordes/radios/colores/foco tomados de variables del tema. Menú con scroll y portal sobre document.body para evitar recortes de tarjetas/tablas. Solo el z-index del portal usa un pequeño ajuste de react-select; los demás estilos están en el módulo SCSS compartido. No hay estado de selección duplicado.
 
@@ -34,11 +34,15 @@ La búsqueda documental usa lupa, form-control-solid, etiqueta accesible Nombre 
 
 Sin builds por la instrucción previa del usuario. Pendiente revisión visual real de desktop/tablet/móvil y claro/oscuro; se necesitan capturas. No se afirma validación visual por disponer de clases responsive.
 
+## Acciones PDF y paginación — 2026-10-26
+
+Las dos interfaces solicitan 50 registros por página en administrativos y documentos. La columna Acciones conserva Ver detalle y añade un botón de icono PDF sin texto visible: bi-file-earmark-pdf, text-danger sobre btn-light, con descripción accesible y título. Si archivo.estado no es disponible, el icono usa text-muted y el botón está deshabilitado. La acción disponible abre el PDF en una nueva pestaña del navegador, conservando el endpoint autenticado del backend.
+
 ## Gestión incremental — 2026-10-23
 
 Se implementan Registrar expediente, Registrar documento y Eliminar documento, conservando tarjeta de identidad, tabla única, filtros, ordenamiento y visor. Las operaciones aparecen únicamente en gestión y permanecen deshabilitadas cuando el backend informa `escrituras_habilitadas: false`; no se activó la configuración de despliegue.
 
-Registrar expediente presenta identidad y CI existentes, confirmación, procesamiento, error y resultado. No solicita datos personales ni código: el código se asigna en MariaDB. Registrar documento utiliza formulario compacto responsive con Formik/Yup, selectores relacionados por ID, solo catálogos habilitados para nuevas altas, tipo original/fotocopia/fotocopia legalizada, fechas opcionales y descripción de hasta 255 caracteres. Los históricos siguen visibles en consulta.
+Registrar expediente presenta identidad y CI existentes, confirmación, procesamiento, error y resultado. No solicita datos personales ni código: el código se asigna en MariaDB. Registrar documento utiliza formulario compacto responsive con Formik/Yup, selectores relacionados por ID, solo catálogos habilitados para nuevas altas, tipo original/fotocopia/fotocopia legalizada, fechas opcionales y descripción de hasta 255 caracteres. Los documentos históricos siguen visibles si su catálogo y categoría están activos.
 
 La selección PDF muestra nombre y tamaño, admite reemplazo antes de enviar y valida hasta 20 MiB (20971520 bytes, presentado como 20 MB). El porcentaje procede de Axios cuando existe total; 100% de subida no se presenta como registro terminado. El envío queda bloqueado mientras se procesa. Los errores de servidor se asocian al campo. La comprobación real del contenido y tamaño se repite en backend.
 

@@ -22,7 +22,7 @@ export const AdministrativoBuscador = ({modo}: {modo: ModoArchivo}) => {
     search: params.get('search') ?? '',
     codigo_archivo: params.get('codigo_archivo') || undefined,
     page: Number.isSafeInteger(pagina) && pagina > 0 && pagina <= 1000000 ? pagina : 1,
-    limit: 10,
+    limit: 50,
     sort: sort === 'ci' || sort === 'codigo_archivo' ? sort : 'nombre',
     order: params.get('order') === 'desc' ? 'desc' : 'asc',
   }

@@ -3,6 +3,7 @@ import {KTIcon} from '../../../../../_metronic/helpers/components/KTIcon'
 import {useEffect, useMemo, useRef, useState} from 'react'
 import {BusquedaDocumentos, Catalogos, Documento, ModoArchivo} from '../core/types'
 import {fechaDocumento} from '../core/presentation'
+import {API_ROUTES} from '../../../../config/apiRoutes'
 import {useDocumentos} from '../core/useArchivoCentral'
 import {Cargando, ErrorConsulta} from './EstadoConsulta'
 import {Paginacion} from './Paginacion'
@@ -25,7 +26,7 @@ export const DocumentoLista = ({
   const [exito, setExito] = useState('')
   const [filtros, setFiltros] = useState<BusquedaDocumentos>({
     page: 1,
-    limit: 10,
+    limit: 50,
     search: '',
     sort: 'fecha_registro',
     order: 'desc',
@@ -216,7 +217,7 @@ export const DocumentoLista = ({
                       {columnaOrdenable('fecha_registro', 'Fecha de registro')}
                       {columnaOrdenable('fecha_inicio', 'Fecha de inicio')}
                       {columnaOrdenable('fecha_fin', 'Fecha de fin')}
-                      <th scope='col'>Detalle</th>
+                      <th scope='col'>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -236,13 +237,45 @@ export const DocumentoLista = ({
                         <td className='text-nowrap'>{fechaDocumento(doc.fecha_inicio)}</td>
                         <td className='text-nowrap'>{fechaDocumento(doc.fecha_fin)}</td>
                         <td>
-                          <button
-                            className='btn btn-sm btn-light-primary'
-                            onClick={() => setSeleccion(doc)}
-                            aria-label={`Ver detalle de ${doc.nombre ?? 'documento'}`}
-                          >
-                            Ver detalle
-                          </button>
+                          <div className='d-flex gap-2'>
+                            {doc.archivo.estado === 'disponible' ? (
+                              <a
+                                className='btn btn-sm btn-icon btn-light'
+                                href={`${API_ROUTES.ARCHIVO_CENTRAL}/documentos/${doc.id}/preview`}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                title='Visualizar PDF en una nueva pestaña'
+                                aria-label={`Visualizar ${
+                                  doc.nombre ?? 'documento'
+                                } en una nueva pestaña`}
+                              >
+                                <i
+                                  className='bi bi-file-earmark-pdf fs-2 text-danger'
+                                  aria-hidden='true'
+                                />
+                              </a>
+                            ) : (
+                              <button
+                                type='button'
+                                className='btn btn-sm btn-icon btn-light'
+                                disabled
+                                title='El PDF no está disponible'
+                                aria-label='Visualizar PDF: archivo no disponible'
+                              >
+                                <i
+                                  className='bi bi-file-earmark-pdf fs-2 text-muted'
+                                  aria-hidden='true'
+                                />
+                              </button>
+                            )}
+                            <button
+                              className='btn btn-sm btn-light-primary text-nowrap'
+                              onClick={() => setSeleccion(doc)}
+                              aria-label={`Ver detalle de ${doc.nombre ?? 'documento'}`}
+                            >
+                              Ver detalle
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

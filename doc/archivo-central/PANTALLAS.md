@@ -50,3 +50,11 @@ Las entradas de Auditoría y Gestión comparten ArchivoCentralPage con modo expl
 El visor es un modal React Bootstrap con metadatos, nulos preservados, aviso de PDF histórico y restauración de foco al cerrar. Las acciones de PDF dependen de la disponibilidad informada por API; solo los archivos disponibles pueden visualizarse o descargarse mediante endpoints autenticados. Los botones de gestión son informativos/deshabilitados y no tienen handlers de escritura; su implementación corresponde a Fase 4 aunque el servidor cambiara su flag.
 
 Las tablas reducen columnas en pantallas pequeñas y permiten desplazamiento horizontal en su contenedor. Formularios usan columnas Bootstrap adaptables. Se usan botones nativos para ordenar columnas y etiquetas explícitas para todos los filtros. La revisión visual en dispositivos reales queda documentada como pendiente, no se presume aprobada por las pruebas de DOM.
+
+## Comportamiento vigente — 2026-10-26
+
+Auditoría y Archivo Central muestran hasta 50 filas por página tanto en el buscador de administrativos como en los documentos del expediente. El total refleja los registros existentes, sin completar páginas artificialmente.
+
+La columna Acciones permite abrir directamente el PDF en una nueva pestaña mediante el icono rojo sobre fondo neutro y consultar metadatos con Ver detalle. El icono gris está deshabilitado cuando el backend no informa disponible; eso no demuestra por sí solo ausencia física del archivo.
+
+Solo aparecen categorías y documentos de catálogo activos, incluidos los conteos. Los funcionarios no se filtran por estado. La apertura directa de documentos excluidos por estado responde 404. Los PDF se entregan por el backend con sesión/grupos y streaming desde MinIO privado, sin enlaces temporales públicos. Esta sección sustituye las descripciones históricas de consulta de catálogos inactivos.

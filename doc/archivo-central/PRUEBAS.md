@@ -1,6 +1,6 @@
 # Verificación de Archivo Central
 
-La validación vigente es la actualización de refactorización documental al final de este documento. Los resultados anteriores son históricos.
+La validación vigente está en la sección Actualización vigente — 2026-10-26 al final de este documento. Los resultados anteriores son históricos.
 
 ## Verificación histórica de Fase 2
 
@@ -120,3 +120,13 @@ Los fixtures son ficticios y las peticiones están simuladas; no equivalen a val
 Backend: 177 pruebas, 614 aserciones correctas; sin escrituras contra MariaDB real. Gestión implementada, deshabilitada por defecto hasta configuración explícita. Editar documento/reemplazar PDF ya registrado siguen fuera de esta entrega.
 
 **Validación visual pendiente:** no hay navegador operativo. Se solicitan capturas de escritorio/tablet/móvil, temas claro/oscuro, formularios con errores y procesamiento, selectores abiertos y confirmación de eliminación. No se afirma haber verificado visualmente esos estados.
+
+## Actualización vigente — 2026-10-26
+
+Cambios: icono PDF rojo de apertura directa en nueva pestaña, estado no disponible gris/deshabilitado, paginación de 50 en AdministrativoBuscador y DocumentoLista para ambos modos. El backend ahora filtra documento y categoría activos en catálogos, listados, totales, conteos y acceso directo al PDF; los casos anteriores de categorías inactivas son históricos.
+
+ESLint de DocumentoLista.tsx y AdministrativoBuscador.tsx correcto, sin errores. No se ejecutó la suite Jest ni un nuevo build para estos ajustes; no se atribuyen los resultados de suites anteriores a esta entrega. Tampoco se regeneraron activos estáticos.
+
+Backend: 233 pruebas y 838 aserciones correctas en tests/Security/phpunit.xml; 12 consultas verificadas con EXPLAIN y esquema sin cambios. Verificación local adicional de catálogos y cinco referencias inactivas en transacción de solo lectura. Detalle en [PRUEBAS backend](../../../siacop_backend/doc/archivo-central/PRUEBAS.md).
+
+La revisión de Markdown posterior modifica solo documentación; no repite pruebas funcionales.
